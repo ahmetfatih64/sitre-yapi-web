@@ -1,0 +1,25 @@
+{
+  "name": "@sitre/db",
+  "version": "0.1.0",
+  "private": true,
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./repos/lead": "./src/repos/lead.ts",
+    "./repos/project": "./src/repos/project.ts",
+    "./repos/outbox": "./src/repos/outbox.ts",
+    "./repos/user": "./src/repos/user.ts",
+    "./repos/audit": "./src/repos/audit.ts",
+    "./repos/media": "./src/repos/media.ts",
+    "./schema": "./prisma/schema.prisma"
+  },
+  "scripts": {
+    "generate": "prisma generate",
+    "migrate:dev": "prisma migrate dev",
+    "studio": "prisma studio"
+  },
+  "peerDependencies": {
+    "@prisma/client": "^5"
+  }
+}

@@ -1,0 +1,45 @@
+# dependencies
+node_modules
+
+# build output
+.next
+out
+dist
+*.tsbuildinfo
+tsconfig.tsbuildinfo
+
+# environment / secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+secrets.json
+credentials.json
+
+# logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# os
+.DS_Store
+Thumbs.db
+
+# deploy / tooling caches
+.vercel
+.turbo
+.idea
+.vscode
+
+# test artifacts
+coverage
+playwright-report
+test-results
+.playwright
+
+# ayri repo olarak tutulan proje (ahmetfatih64/aka-software)
+scripts/aka_software/

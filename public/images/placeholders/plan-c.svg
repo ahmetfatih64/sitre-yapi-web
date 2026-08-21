@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 700" role="img" aria-label="Plan C placeholder">
+  <rect width="900" height="700" fill="#ffffff"/>
+  <g fill="none" stroke="#2b2a28" stroke-width="2">
+    <rect x="60" y="60" width="780" height="580"/>
+    <line x1="60" y1="360" x2="840" y2="360"/>
+    <line x1="420" y1="60" x2="420" y2="360"/>
+    <line x1="300" y1="360" x2="300" y2="640"/>
+    <line x1="580" y1="360" x2="580" y2="640"/>
+  </g>
+  <g fill="#8d7c6a" font-family="Inter, sans-serif" font-size="14" letter-spacing="2">
+    <text x="170" y="220">SALON</text>
+    <text x="560" y="220">MUTFAK</text>
+    <text x="140" y="520">Y1</text>
+    <text x="410" y="520">Y2</text>
+    <text x="670" y="520">Y3 / TERAS</text>
+  </g>
+  <text x="60" y="40" fill="#8d7c6a" font-family="Georgia, serif" font-size="18" letter-spacing="4">C · DUBLEKS · PLACEHOLDER</text>
+</svg>

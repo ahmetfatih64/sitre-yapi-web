@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" role="img" aria-label="Sitre proje placeholder 1">
+  <defs>
+    <linearGradient id="g1" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#1e1a16"/>
+      <stop offset="1" stop-color="#4a4744"/>
+    </linearGradient>
+  </defs>
+  <rect width="1600" height="1000" fill="url(#g1)"/>
+  <g fill="none" stroke="#8d7c6a" stroke-width="1.2" opacity="0.55">
+    <path d="M0 760 L1600 620"/>
+    <path d="M0 820 L1600 700"/>
+    <rect x="260" y="420" width="260" height="320"/>
+    <rect x="560" y="360" width="220" height="380"/>
+    <rect x="820" y="440" width="260" height="300"/>
+    <rect x="1120" y="380" width="240" height="360"/>
+  </g>
+  <text x="80" y="120" fill="#c1b567" font-family="Georgia, serif" font-size="32" letter-spacing="4">SITRE YAPI</text>
+  <text x="80" y="160" fill="#bdb7ad" font-family="Inter, sans-serif" font-size="14" letter-spacing="2">PROJECT COVER · PLACEHOLDER</text>
+</svg>
