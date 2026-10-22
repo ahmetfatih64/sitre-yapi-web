@@ -22,6 +22,12 @@ const DEV_ACTORS: Record<string, AuthSession["user"]> = {
   sales: { id: "dev-sales", email: "sales@dev.local", name: "Dev Sales", role: "SALES" },
 };
 
+const ROLES: readonly Role[] = ["OWNER", "ADMIN", "EDITOR", "SALES", "VIEWER"];
+
+function toRole(value: unknown): Role {
+  return ROLES.includes(value as Role) ? (value as Role) : "VIEWER";
+}
+
 export async function getSession(): Promise<AuthSession | null> {
   if (!env.IS_PROD) {
     const jar = await cookies();
@@ -34,8 +40,25 @@ export async function getSession(): Promise<AuthSession | null> {
     };
   }
 
+  // Üretim: gerçek Auth.js oturumu. Örnek route handler ile paylaşılır.
+  const { getAuthInstance } = await import("./instance");
+  const instance = await getAuthInstance();
+  if (!instance) return null;
 
-  return null;
+  const session = await instance.auth();
+  const user = session?.user;
+  if (!user?.id || !user.email) return null;
+
+  return {
+    user: {
+      id: user.id,
+      email: user.email,
+      name: user.name ?? null,
+      role: toRole(user.role),
+    },
+    expires:
+      session?.expires ?? new Date(Date.now() + 8 * 60 * 60 * 1000).toISOString(),
+  };
 }
 
 export async function requireSession(): Promise<AuthSession> {

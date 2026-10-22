@@ -64,6 +64,11 @@ test.describe("admin surface — RBAC boundary", () => {
     ]);
     const res = await page.goto("/admin/users");
     expect(res?.status()).toBeLessThan(500);
-    await expect(page).toHaveURL(/\/admin(?!\/users)/);
+    // Yönlendirme sunucuda başlayıp istemcide tamamlanıyor. Varsayılan 5 sn'lik
+    // beklenti penceresi paralel koşuda yetmiyordu; belirleyici bekleme kullan.
+    await page.waitForURL((url) => !url.pathname.startsWith("/admin/users"), {
+      timeout: 20_000,
+    });
+    expect(new URL(page.url()).pathname).toBe("/admin");
   });
 });

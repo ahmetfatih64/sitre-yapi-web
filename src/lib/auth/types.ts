@@ -3,6 +3,12 @@
  * pulling next-auth into the bundle until the package is installed.
  */
 export interface NextAuthConfig {
+  /**
+   * Auth.js v5, tanımadığı bir barındırmada gelen Host başlığına varsayılan
+   * olarak güvenmez ve tüm uç noktalar 500 döner (UntrustedHost). Vercel bunu
+   * otomatik ayarlar; kendi sunucunda barındırırken açıkça verilmelidir.
+   */
+  trustHost?: boolean;
   session: { strategy: "database" | "jwt"; maxAge?: number };
   pages?: { signIn?: string };
   callbacks?: {

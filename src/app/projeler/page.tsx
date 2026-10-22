@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import { projects } from "@/content/projects";
+import { Suspense } from "react";
+import { getAllProjects } from "@/content/projects/service";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { CtaBand } from "@/components/sections/CtaBand";
 import { ProjectsFilter } from "./ProjectsFilter";
@@ -12,7 +13,7 @@ export const metadata: Metadata = buildMetadata({
     "Sitre Yapı'nın aktif, tamamlanmış ve yakında satışa çıkacak projeleri.",
 });
 
-export default function ProjelerPage() {
+export default async function ProjelerPage() {
   return (
     <>
       <section className="section pt-40">
@@ -27,7 +28,10 @@ export default function ProjelerPage() {
         </div>
       </section>
 
-      <ProjectsFilter projects={projects} />
+      {/* useSearchParams Suspense sınırı ister; sayfa statik üretildiği için şart. */}
+      <Suspense fallback={<div className="container-page pb-32" />}>
+        <ProjectsFilter projects={await getAllProjects()} />
+      </Suspense>
 
       <CtaBand
         overline="Özel talep"

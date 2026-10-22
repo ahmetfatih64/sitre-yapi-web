@@ -175,6 +175,14 @@
   }
   .btn-primary:hover { background: transparent; color: var(--color-brand); }
 
+  /* Koyu hero üstündeki şeffaf header için ters kontrast buton. */
+  .btn-on-dark {
+    background: #fff;
+    color: var(--color-brand);
+    border-color: #fff;
+  }
+  .btn-on-dark:hover { background: transparent; color: #fff; }
+
   .btn-outline {
     background: transparent;
     color: var(--color-brand);
@@ -198,27 +206,6 @@
     border-color: #fff;
   }
   .btn-on-dark:hover { background: transparent; color: #fff; }
-
-  .card-project {
-    position: relative;
-    overflow: hidden;
-    background: var(--color-bg-alt);
-    transition: transform 500ms var(--ease-out);
-  }
-  .card-project__media {
-    aspect-ratio: 4 / 5;
-    overflow: hidden;
-    background: var(--color-border);
-  }
-  .card-project__media img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    transition: transform 800ms var(--ease-out);
-  }
-  .card-project:hover .card-project__media img {
-    transform: scale(1.05);
-  }
 
   .hairline { height: 1px; background: var(--color-border); width: 100%; }
 
@@ -293,3 +280,1105 @@
     scroll-behavior: auto !important;
   }
 }
+
+/* ============================================================
+   Sinematik editorial katman — koyu bölümler, sahneleme, proje rayı
+   ============================================================ */
+@layer components {
+  /* Koyu zeminlere film grenli doku; düz siyahın dijital hissini kırar. */
+  .grain::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    opacity: 0.2;
+    mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  /* Scroll ile sahneleme. Kapanışı Reveal bileşeni yönetir. */
+  .reveal {
+    opacity: 0;
+    transform: translateY(28px);
+    transition:
+      opacity 900ms var(--ease-out),
+      transform 900ms var(--ease-out);
+  }
+  .reveal--in {
+    opacity: 1;
+    transform: none;
+  }
+
+  /* ---- Yatay proje rayı ---- */
+  .rail {
+    display: flex;
+    gap: 1.25rem;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    padding-inline: 1rem;
+    scroll-padding-inline: 1rem;
+    padding-block: 0.25rem;
+  }
+  .rail::-webkit-scrollbar {
+    display: none;
+  }
+  .rail:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 4px;
+  }
+  @media (min-width: 768px) {
+    .rail {
+      gap: 1.75rem;
+      padding-inline: 2.5rem;
+      scroll-padding-inline: 2.5rem;
+    }
+  }
+
+  .rail__item {
+    flex: 0 0 auto;
+    scroll-snap-align: start;
+    width: min(84vw, 400px);
+  }
+  @media (min-width: 768px) {
+    .rail__item { width: min(56vw, 480px); }
+  }
+  @media (min-width: 1280px) {
+    /* Masaüstünde iki kart + üçüncüsünden bir pay görünür; kaydırma anlam kazanır. */
+    .rail__item { width: min(40vw, 580px); }
+  }
+
+  .slide-card {
+    position: relative;
+    display: block;
+    overflow: hidden;
+    background: #0d0a08;
+  }
+  .slide-card__media {
+    position: relative;
+    aspect-ratio: 4 / 5;
+    overflow: hidden;
+  }
+  .slide-card__media img {
+    /* Karışık kaynaklı stok görselleri tek bir görsel dile yaklaştırır. */
+    filter: saturate(0.85) contrast(1.06);
+    transform: scale(1.02);
+    transition:
+      transform 1200ms var(--ease-out),
+      filter 700ms var(--ease-out);
+  }
+  .slide-card:hover .slide-card__media img,
+  .slide-card:focus-visible .slide-card__media img {
+    transform: scale(1.08);
+    filter: saturate(1) contrast(1.06);
+  }
+
+  .slide-card__veil {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: linear-gradient(
+      180deg,
+      rgba(13, 10, 8, 0) 30%,
+      rgba(13, 10, 8, 0.55) 62%,
+      rgba(13, 10, 8, 0.94) 100%
+    );
+  }
+
+  .slide-card__index {
+    position: absolute;
+    top: 1.25rem;
+    left: 1.5rem;
+    font-family: var(--font-display);
+    font-size: 2.5rem;
+    line-height: 1;
+    color: rgba(255, 255, 255, 0.28);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .slide-card__status {
+    position: absolute;
+    top: 1.5rem;
+    right: 1.5rem;
+    font-size: 10px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    padding: 0.35rem 0.7rem;
+    color: #ece8e3;
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    backdrop-filter: blur(6px);
+  }
+
+  .slide-card__body {
+    position: absolute;
+    inset-inline: 0;
+    bottom: 0;
+    padding: 1.75rem 1.5rem 1.85rem;
+  }
+
+  .slide-card__rule {
+    display: block;
+    height: 1px;
+    width: 100%;
+    background: rgba(212, 168, 67, 0.55);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 700ms var(--ease-out);
+  }
+  .slide-card:hover .slide-card__rule,
+  .slide-card:focus-visible .slide-card__rule {
+    transform: scaleX(1);
+  }
+
+  .rail-btn {
+    width: 48px;
+    height: 48px;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.28);
+    color: #ece8e3;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition:
+      background 300ms var(--ease-out),
+      border-color 300ms var(--ease-out),
+      color 300ms var(--ease-out);
+  }
+  .rail-btn:hover:not(:disabled) {
+    background: var(--color-accent);
+    border-color: var(--color-accent);
+    color: #14100d;
+  }
+  .rail-btn:disabled {
+    opacity: 0.28;
+    cursor: not-allowed;
+  }
+
+  .rail-progress {
+    display: block;
+    position: relative;
+    height: 2px;
+    background: rgba(255, 255, 255, 0.16);
+    overflow: hidden;
+  }
+  .rail-progress__bar {
+    position: absolute;
+    inset-block: 0;
+    left: 0;
+    background: var(--color-accent);
+    transition: width 450ms var(--ease-out);
+  }
+}
+
+/* ============================================================
+   Açık zeminli bölümler — hizmet indeksi ve istatistik bandı
+   ============================================================ */
+@layer components {
+  .service-row {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 0.25rem 1.5rem;
+    align-items: baseline;
+    padding-block: 1.75rem;
+    border-bottom: 1px solid var(--color-border);
+    transition: background 400ms var(--ease-out);
+  }
+  @media (min-width: 900px) {
+    .service-row {
+      grid-template-columns: 4rem minmax(0, 26rem) minmax(0, 1fr);
+      gap: 2.5rem;
+      padding-block: 2.25rem;
+      align-items: start;
+    }
+  }
+  .service-row:hover {
+    background: rgba(212, 168, 67, 0.05);
+  }
+
+  .service-row__n {
+    font-family: var(--font-display);
+    font-size: 0.95rem;
+    letter-spacing: 0.1em;
+    color: var(--color-accent);
+    font-variant-numeric: tabular-nums;
+    padding-top: 0.35rem;
+  }
+
+  .service-row__title {
+    font-family: var(--font-display);
+    font-size: clamp(1.5rem, 1.2vw + 1.1rem, 2.15rem);
+    line-height: 1.15;
+    transition: transform 400ms var(--ease-out);
+  }
+  @media (min-width: 900px) {
+    .service-row:hover .service-row__title {
+      transform: translateX(6px);
+    }
+  }
+
+  .service-row__body {
+    grid-column: 2 / -1;
+    color: var(--color-brand-soft);
+    font-size: 0.95rem;
+    line-height: 1.65;
+    max-width: 46ch;
+  }
+  @media (min-width: 900px) {
+    .service-row__body {
+      grid-column: 3 / 4;
+      padding-top: 0.4rem;
+    }
+  }
+
+  /* ---- İstatistik bandı ---- */
+  .stat-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    border-top: 1px solid var(--color-border);
+    border-left: 1px solid var(--color-border);
+  }
+  .stat-cell {
+    border-right: 1px solid var(--color-border);
+    border-bottom: 1px solid var(--color-border);
+    padding: 1.75rem 1.5rem 2rem;
+    transition: background 400ms var(--ease-out);
+  }
+  @media (min-width: 768px) {
+    .stat-cell { padding: 2.5rem 2rem 2.75rem; }
+  }
+  .stat-cell:hover {
+    background: rgba(212, 168, 67, 0.05);
+  }
+  .stat-cell__value {
+    font-family: var(--font-display);
+    font-size: clamp(2rem, 2.4vw + 1.2rem, 3.25rem);
+    line-height: 1.05;
+    letter-spacing: -0.015em;
+    margin-top: 0.85rem;
+  }
+}
+
+/* ============================================================
+   Süreç şeridi, kurucular künyesi ve kart meta ayracı
+   ============================================================ */
+@layer components {
+  .slide-card__dot {
+    display: inline-block;
+    margin-inline: 0.5rem;
+    color: rgba(255, 255, 255, 0.35);
+  }
+
+  /* ---- Kurucular künyesi ---- */
+  .founders {
+    margin-top: 2.5rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--color-border);
+  }
+  .founders__list {
+    margin-top: 1.25rem;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem 2.5rem;
+  }
+  @media (min-width: 640px) {
+    .founders__list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+  .founders__item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+  }
+  .founders__name {
+    font-family: var(--font-display);
+    font-size: 1.15rem;
+  }
+  .founders__phone {
+    font-size: 0.9rem;
+    color: var(--color-brand-soft);
+    font-variant-numeric: tabular-nums;
+    transition: color 250ms var(--ease-out);
+  }
+  .founders__phone:hover {
+    color: var(--color-accent);
+  }
+}
+
+
+/* ============================================================
+   Kart geçişleri — dinlenmede sade künye, işaretlendiğinde açılan gövde
+   ============================================================ */
+@layer components {
+  .slide-card__summary {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    margin-top: 0.75rem;
+    font-size: 0.875rem;
+    line-height: 1.5;
+    color: rgba(255, 255, 255, 0.72);
+    max-width: 42ch;
+  }
+
+  .slide-card__cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 1rem;
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--color-accent);
+    transition: gap 400ms var(--ease-out);
+  }
+  .slide-card:hover .slide-card__cta {
+    gap: 1rem;
+  }
+
+  .slide-card__reveal {
+    display: block;
+  }
+  .slide-card__rule {
+    margin-top: 1.5rem;
+  }
+
+  /*
+   * İşaretçili cihazlarda kart dinlenirken yalnızca künye ve ad görünür;
+   * özet ve çağrı kartın alt kenarının altında bekler. Yükseklik sabittir
+   * (özet iki satıra kırpılır), bu yüzden açılma yerleşimi kaydırmaz.
+   */
+  @media (hover: hover) and (pointer: fine) {
+    .slide-card__body {
+      transform: translateY(6.5rem);
+      transition: transform 650ms var(--ease-out);
+    }
+    .slide-card__reveal {
+      opacity: 0;
+      transition: opacity 400ms var(--ease-out);
+    }
+    .slide-card:hover .slide-card__body,
+    .slide-card:focus-visible .slide-card__body {
+      transform: translateY(0);
+    }
+    .slide-card:hover .slide-card__reveal,
+    .slide-card:focus-visible .slide-card__reveal {
+      opacity: 1;
+      transition-delay: 120ms;
+    }
+    /* Gövde açılırken perde koyulaşır ki metin her karede okunur kalsın. */
+    .slide-card__veil {
+      transition: opacity 650ms var(--ease-out);
+    }
+    .slide-card:hover .slide-card__veil {
+      opacity: 1;
+    }
+    .slide-card__veil {
+      opacity: 0.82;
+    }
+  }
+
+  /* İlk kart geniş, diğerleri dar — editoryal asimetri. */
+  @media (min-width: 1280px) {
+    .rail__item { width: min(38vw, 540px); }
+    .rail__item:first-child { width: min(45vw, 640px); }
+  }
+}
+
+/* ============================================================
+   Kapanış bölgesi — CTA ve footer tek bir koyu tabana oturur
+   ============================================================ */
+@layer components {
+  /* CTA ve footer aynı zemini paylaşır; aralarında renk sıçraması değil,
+     yalnızca ince bir çizgi vardır. Sayfa tek parça bir tabana iner. */
+  .cta-close {
+    position: relative;
+    overflow: hidden;
+    background: #1c1a18;
+    padding-block: 6rem;
+  }
+  @media (min-width: 1024px) {
+    .cta-close { padding-block: 9rem; }
+  }
+
+  .site-footer {
+    position: relative;
+    overflow: hidden;
+    background: #1c1a18;
+    color: #d9d5d0;
+    border-top: 1px solid rgba(255, 255, 255, 0.09);
+  }
+
+  .site-footer__top {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    padding-block: 3.5rem 3rem;
+  }
+  @media (min-width: 900px) {
+    .site-footer__top {
+      flex-direction: row;
+      align-items: flex-end;
+      justify-content: space-between;
+      padding-block: 5rem 3.5rem;
+    }
+  }
+
+  .site-footer__claim {
+    font-family: var(--font-display);
+    font-size: clamp(1.35rem, 1.4vw + 1rem, 2rem);
+    line-height: 1.25;
+    color: #fff;
+    max-width: 26ch;
+  }
+  @media (min-width: 900px) {
+    .site-footer__claim { text-align: right; }
+  }
+
+  .site-footer__grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2.75rem;
+    padding-block: 3rem 4rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.09);
+  }
+  @media (min-width: 640px) {
+    .site-footer__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+  @media (min-width: 1024px) {
+    .site-footer__grid {
+      grid-template-columns: 1.4fr 0.8fr 0.8fr 1.3fr;
+      gap: 3.5rem;
+      padding-block: 3.5rem 5rem;
+    }
+  }
+
+  .site-footer__desc {
+    font-size: 0.9rem;
+    line-height: 1.7;
+    color: #9a9590;
+    max-width: 34ch;
+  }
+
+  .site-footer__heading {
+    font-family: var(--font-body);
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--color-accent);
+    margin-bottom: 1.5rem;
+  }
+
+  .site-footer__links {
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+  }
+
+  .site-footer__link {
+    position: relative;
+    font-size: 0.9rem;
+    color: #bdb7ad;
+    transition: color 280ms var(--ease-out);
+  }
+  .site-footer__link:hover { color: #fff; }
+
+  .site-footer__address {
+    font-style: normal;
+    font-size: 0.9rem;
+    line-height: 1.7;
+    color: #bdb7ad;
+  }
+
+  .site-footer__people {
+    margin-top: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+  }
+  .site-footer__people li {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+  }
+  .site-footer__person {
+    font-family: var(--font-display);
+    font-size: 1.02rem;
+    color: #fff;
+  }
+
+  .site-footer__mail {
+    display: inline-block;
+    margin-top: 1.5rem;
+    font-size: 0.9rem;
+    color: #bdb7ad;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.22);
+    padding-bottom: 2px;
+    transition: color 280ms var(--ease-out), border-color 280ms var(--ease-out);
+  }
+  .site-footer__mail:hover {
+    color: #fff;
+    border-color: var(--color-accent);
+  }
+
+  .site-footer__social {
+    margin-top: 2rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.25rem;
+  }
+  .site-footer__social-link {
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: #7a756f;
+    transition: color 280ms var(--ease-out);
+  }
+  .site-footer__social-link:hover { color: #fff; }
+
+  .site-footer__bar {
+    position: relative;
+    z-index: 2;
+    border-top: 1px solid rgba(255, 255, 255, 0.09);
+    padding-block: 1.6rem;
+  }
+  .site-footer__bar-inner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.9rem;
+    font-size: 11px;
+    letter-spacing: 0.04em;
+    color: #6d6862;
+    text-align: center;
+  }
+  @media (min-width: 768px) {
+    .site-footer__bar-inner {
+      flex-direction: row;
+      justify-content: space-between;
+      text-align: left;
+    }
+  }
+  .site-footer__discipline { letter-spacing: 0.14em; text-transform: uppercase; }
+
+  .site-footer__top-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #8d8880;
+    transition: color 280ms var(--ease-out);
+  }
+  .site-footer__top-link:hover { color: var(--color-accent); }
+}
+
+/* Koyu kapanış bölgesinde başlık rengi. Temel h1–h5 kuralı koyu marka
+   rengini zorluyor; miras alınan açık renk tek başına yetmiyor. */
+@layer components {
+  .cta-close h2,
+  .cta-close h3 {
+    color: #fff;
+  }
+
+  .site-footer__brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 1rem;
+  }
+  .site-footer__wordmark {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+  .site-footer__name {
+    font-family: var(--font-display);
+    font-size: 1.5rem;
+    line-height: 1;
+    color: #fff;
+  }
+  .site-footer__discipline-sm {
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: #8d8880;
+  }
+}
+
+
+/* Kapanış bandı sıkılaştırıldı: sayfa sonunda bir davet, bir manifesto değil. */
+@layer components {
+  .cta-close {
+    padding-block: 3.25rem;
+  }
+  @media (min-width: 1024px) {
+    .cta-close { padding-block: 4.5rem; }
+  }
+
+  .cta-close__title {
+    font-family: var(--font-display);
+    font-size: clamp(1.5rem, 1.4vw + 1.05rem, 2.1rem);
+    line-height: 1.2;
+    letter-spacing: -0.01em;
+    font-weight: 400;
+    max-width: 24ch;
+  }
+
+  .cta-close__desc {
+    margin-top: 0.6rem;
+    font-size: 0.9rem;
+    line-height: 1.6;
+    max-width: 52ch;
+  }
+}
+
+/* ============================================================
+   Erişilebilirlik düzeltmeleri — WCAG AA kontrast
+   ============================================================ */
+@theme {
+  /* Marka altını açık zeminde 12px metin için 2.21:1 kalıyordu.
+     Koyu zeminde 7.83:1 ile sorunsuz, o yüzden ton ikiye ayrıldı. */
+  --color-accent-ink: #8a6718;
+}
+
+@layer components {
+  /* Varsayılan (açık zemin) */
+  .eyebrow {
+    color: var(--color-accent-ink);
+  }
+  /* Koyu bölümlerde parlak marka altını geri gelir */
+  .dark-section .eyebrow,
+  .cta-close .eyebrow,
+  .site-footer .eyebrow,
+  .slide-card .eyebrow {
+    color: var(--color-accent);
+  }
+
+  .site-footer__social-link,
+  .site-footer__bar-inner {
+    color: #918c85;
+  }
+  .site-footer__top-link {
+    color: #918c85;
+  }
+}
+
+/* Hero video duraklatma kontrolü — süresiz hareket için WCAG 2.2.2 */
+@layer components {
+  .hero-video-toggle {
+    position: absolute;
+    right: 1rem;
+    bottom: 1rem;
+    z-index: 20;
+    width: 40px;
+    height: 40px;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    background: rgba(13, 10, 8, 0.45);
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    backdrop-filter: blur(6px);
+    transition:
+      background 280ms var(--ease-out),
+      border-color 280ms var(--ease-out),
+      color 280ms var(--ease-out);
+  }
+  .hero-video-toggle:hover {
+    background: var(--color-accent);
+    border-color: var(--color-accent);
+    color: #14100d;
+  }
+  @media (min-width: 768px) {
+    .hero-video-toggle { right: 2.5rem; bottom: 2.5rem; }
+  }
+}
+
+/* Onay verilmeden harita yüklenmez; yerine bu tutucu gösterilir. */
+@layer components {
+  .map-consent {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    text-align: center;
+    padding: 2rem 1.5rem;
+  }
+  .map-consent__label {
+    font-family: var(--font-display);
+    font-size: 1.15rem;
+    color: var(--color-brand);
+  }
+  .map-consent__note {
+    font-size: 0.85rem;
+    line-height: 1.6;
+    color: var(--color-brand-soft);
+    max-width: 46ch;
+  }
+  .map-consent__actions {
+    margin-top: 0.75rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    justify-content: center;
+  }
+  .map-consent__prefs {
+    margin-top: 0.35rem;
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--color-brand-soft);
+    border-bottom: 1px solid var(--color-border);
+    padding-bottom: 2px;
+    transition: color 250ms var(--ease-out), border-color 250ms var(--ease-out);
+  }
+  .map-consent__prefs:hover {
+    color: var(--color-accent-ink);
+    border-color: var(--color-accent-ink);
+  }
+}
+
+
+/* Detay sayfasındaki ilgili proje kartları: aynı dil, yatay oran. */
+@layer components {
+  .slide-card--wide .slide-card__media {
+    aspect-ratio: 16 / 10;
+  }
+}
+
+
+
+
+/* Filtre sonucu boş kaldığında gösterilen durum. */
+@layer components {
+  .empty-state {
+    padding-block: 4rem 3rem;
+    max-width: 46ch;
+  }
+  .empty-state__title {
+    font-family: var(--font-display);
+    font-size: 1.35rem;
+    line-height: 1.3;
+    color: var(--color-brand);
+  }
+  .empty-state__note {
+    margin-top: 0.75rem;
+    font-size: 0.9rem;
+    line-height: 1.7;
+    color: var(--color-brand-soft);
+  }
+}
+
+
+
+/* Yükleme iskeleti. Hareket tercihi kapalıysa nabız durur (global kural). */
+@layer components {
+  .skeleton {
+    background: linear-gradient(
+      90deg,
+      var(--color-bg-alt) 25%,
+      #eeeae5 37%,
+      var(--color-bg-alt) 63%
+    );
+    background-size: 400% 100%;
+    animation: skeleton-pulse 1.4s ease-in-out infinite;
+  }
+  .skeleton--eyebrow { height: 12px; width: 120px; margin-bottom: 1.5rem; }
+  .skeleton--title { height: 44px; width: min(60%, 520px); margin-bottom: 2rem; }
+  .skeleton--line { height: 14px; width: min(70%, 640px); margin-bottom: 0.85rem; }
+  .skeleton--short { width: min(45%, 420px); }
+  .skeleton--card { aspect-ratio: 4 / 5; width: 100%; }
+}
+
+@keyframes skeleton-pulse {
+  0% { background-position: 100% 50%; }
+  100% { background-position: 0 50%; }
+}
+
+
+
+
+
+/* ============================================================
+   Yerleşke ve yaşam — iki video sahnesi
+   ============================================================ */
+@layer components {
+  .scenes {
+    margin-top: 3.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 3rem;
+  }
+  @media (min-width: 1024px) {
+    .scenes { margin-top: 5rem; gap: 5rem; }
+  }
+
+  .scene {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.75rem;
+    align-items: center;
+  }
+  @media (min-width: 900px) {
+    .scene { grid-template-columns: 1.4fr 1fr; gap: 3rem; }
+    .scene--reversed .scene__media { order: 2; }
+    .scene--reversed .scene__text { order: 1; }
+  }
+
+  .scene__media {
+    position: relative;
+    overflow: hidden;
+    aspect-ratio: 16 / 9;
+    background: #0d0a08;
+  }
+  .scene__video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    /* Karışık kaynaklı görüntüleri tek görsel dile yaklaştırır. */
+    filter: saturate(0.88) contrast(1.05);
+  }
+
+  .scene__title {
+    font-family: var(--font-display);
+    font-size: clamp(1.4rem, 1.2vw + 1rem, 2rem);
+    line-height: 1.25;
+    color: #fff;
+  }
+  .scene__body {
+    margin-top: 1rem;
+    font-size: 0.95rem;
+    line-height: 1.7;
+    color: rgba(236, 232, 227, 0.7);
+    max-width: 46ch;
+  }
+}
+
+
+/* Kat planı etiketleri
+   Metin viewBox birimindedir; SVG dar ekranda küçülünce oda adı okunmaz hale
+   gelir. Bu yüzden dar ekranda ad gizlenir (adlar zaten altındaki oda
+   dökümünde tam haliyle var) ve yalnızca m² büyütülerek bırakılır. */
+@media (max-width: 640px) {
+  .fp-name {
+    display: none;
+  }
+  .fp-area {
+    font-size: 28px;
+    fill: #2b2a28;
+  }
+}
+
+
+/* ===========================================================
+   Baskı / PDF
+   "Kataloğu indir" sunucuda PDF üretmez; sayfanın kendisi baskı
+   için biçimlendirilir. Üretilen kat planları SVG olduğu için
+   kağıtta vektörel, yani net çıkar.
+   =========================================================== */
+
+.print-only {
+  display: none;
+}
+
+@media print {
+  @page {
+    margin: 16mm 14mm;
+  }
+
+  /* Arka plan dolguları ve işaretçi renkleri korunsun. */
+  *,
+  *::before,
+  *::after {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  html,
+  body {
+    background: #fff !important;
+    color: #1a1a1a;
+    font-size: 10.5pt;
+  }
+
+  .print-only {
+    display: block;
+  }
+
+  /* Ekrana özgü kabuk ve etkileşimli bölümler kağıda basılmaz.
+     Burada `header`/`footer` gibi element seçicileri KULLANILMAZ: baskıya
+     özel bloklar da semantik <header> içerir ve onlar da gizlenirdi.
+     Gizlenecek her şey `data-print="hide"` ile açıkça işaretlenir. */
+  video,
+  #sanal-tur,
+  [data-print="hide"] {
+    display: none !important;
+  }
+
+  /* Sahneleme animasyonu içeriği gizli tutar; baskıda hepsi görünmeli.
+     Bu kural olmadan katalogun büyük bölümü boş çıkar. */
+  .reveal {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+
+  .section {
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+    margin-bottom: 12mm !important;
+    background: #fff !important;
+  }
+
+  .container-page {
+    max-width: none !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+
+  section,
+  li,
+  figure,
+  table {
+    break-inside: avoid;
+  }
+
+  #planlar,
+  #ilerleme,
+  #lokasyon {
+    break-before: page;
+  }
+
+  /* Kağıtta bağlantı vurgusu gürültüdür. */
+  a {
+    color: inherit !important;
+    text-decoration: none !important;
+  }
+
+  img,
+  svg {
+    max-width: 100% !important;
+    height: auto !important;
+  }
+
+  .grain::after,
+  .grain::before {
+    display: none !important;
+  }
+
+  /* ---- Baskı kapağı ---- */
+  .print-cover {
+    break-after: page;
+  }
+  .print-cover__brand {
+    font-size: 9pt;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: #6b665e;
+  }
+  .print-cover__title {
+    font-family: var(--font-display);
+    font-size: 30pt;
+    line-height: 1.1;
+    margin: 6mm 0 3mm;
+  }
+  .print-cover__meta {
+    font-size: 11pt;
+    color: #4a463f;
+  }
+  .print-cover__facts {
+    margin-top: 10mm;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 4mm 10mm;
+  }
+  .print-cover__facts dt {
+    font-size: 8.5pt;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #6b665e;
+  }
+  .print-cover__facts dd {
+    margin: 1mm 0 0;
+    font-size: 12pt;
+  }
+  .print-cover__contact {
+    margin-top: 14mm;
+    font-size: 9.5pt;
+    line-height: 1.6;
+    color: #4a463f;
+  }
+  .print-cover__note {
+    margin-top: 4mm;
+    font-size: 8.5pt;
+    color: #6b665e;
+  }
+}
+
+
+@media print {
+  /* Eylem düğmeleri kağıtta işlevsizdir. Oda listesi gibi içerik taşıyan
+     <button>'lar .btn sınıfını kullanmadığı için etkilenmez. */
+  .btn {
+    display: none !important;
+  }
+
+  /* ---- Baskı plan föyleri ---- */
+  .print-plans__heading {
+    font-family: var(--font-display);
+    font-size: 20pt;
+    margin-bottom: 8mm;
+  }
+  .print-plans__item {
+    break-before: page;
+    break-inside: avoid;
+  }
+  .print-plans__item:first-of-type {
+    break-before: auto;
+  }
+  .print-plans__header {
+    display: flex;
+    align-items: baseline;
+    gap: 5mm;
+    margin-bottom: 4mm;
+    border-bottom: 1px solid #d9d5cd;
+    padding-bottom: 2mm;
+  }
+  .print-plans__header h3 {
+    font-family: var(--font-display);
+    font-size: 17pt;
+  }
+  .print-plans__header p {
+    font-size: 9pt;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #6b665e;
+  }
+  .print-plans__facts {
+    margin-top: 5mm;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 3mm 6mm;
+  }
+  .print-plans__facts dt {
+    font-size: 8pt;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #6b665e;
+  }
+  .print-plans__facts dd {
+    margin: 1mm 0 0;
+    font-size: 11pt;
+  }
+}
+
+
+/* turbopack yeniden derleme tetigi */
+

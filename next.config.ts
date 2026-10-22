@@ -21,6 +21,13 @@ const baselineHeaders = [
 ];
 
 const nextConfig: NextConfig = {
+  /**
+   * Build ciktisi dizini. `next build` ile `next dev` ayni dizini
+   * paylasirsa, dev sunucusu calisirken alinan bir uretim build'i onun
+   * chunk'larini siler ve dev sunucusu 500 vermeye baslar. `npm run
+   * build:prod` bu degiskeni ayarlayarak ayri bir dizine yazar.
+   */
+  distDir: process.env.NEXT_DIST_DIR ?? ".next",
   reactStrictMode: true,
   poweredByHeader: false,
   images: {

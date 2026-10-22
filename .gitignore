@@ -43,3 +43,6 @@ test-results
 
 # ayri repo olarak tutulan proje (ahmetfatih64/aka-software)
 scripts/aka_software/
+
+# ayri uretim build dizini (scripts/prod.mjs)
+.next-prod

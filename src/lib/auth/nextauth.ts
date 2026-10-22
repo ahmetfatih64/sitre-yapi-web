@@ -12,6 +12,10 @@ import { env } from "@/lib/env";
 export const isAuthEnabled = env.HAS_AUTH;
 
 export const authConfig: NextAuthConfig = {
+  // Kanonik köken NEXTAUTH_URL ile sabitlenir; ters vekil sunucunun doğru
+  // Host/X-Forwarded-Host başlığı geçirmesi dağıtımın sorumluluğundadır.
+  // Bu olmadan kendi sunucunda barındırılan her kurulumda giriş 500 verir.
+  trustHost: true,
   session: { strategy: "database", maxAge: 60 * 60 * 8 },
   pages: { signIn: "/admin/login" },
   callbacks: {

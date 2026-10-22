@@ -22,10 +22,24 @@ const schema = z.object({
   // Outbound email (Postmark). Optional — log adapter when absent.
   POSTMARK_SERVER_TOKEN: z.string().optional(),
   POSTMARK_FROM: z.string().email().optional(),
+
+  // Genel SMTP. Verilirse Postmark yerine bu kullanılır; yerel bir posta
+  // yakalayıcısına (Mailpit vb.) yönlendirmeyi ve satıcı değiştirmeyi sağlar.
+  EMAIL_SERVER_HOST: z.string().optional(),
+  EMAIL_SERVER_PORT: z.coerce.number().int().positive().optional(),
+  EMAIL_SERVER_USER: z.string().optional(),
+  EMAIL_SERVER_PASSWORD: z.string().optional(),
+  EMAIL_FROM: z.string().email().optional(),
   LEAD_NOTIFY_TO: z.string().optional(), // comma-separated
 
   // CRM (HubSpot) placeholder.
   HUBSPOT_PRIVATE_TOKEN: z.string().optional(),
+
+  // Outbox kuyruğunu işleyen zamanlanmış görevin paylaşılan sırrı.
+  CRON_SECRET: z.string().optional(),
+
+  // Yeni talep bildirimi için Slack webhook'u.
+  SLACK_WEBHOOK_URL: z.string().url().optional(),
 
   // Sentry.
   SENTRY_DSN: z.string().url().optional(),

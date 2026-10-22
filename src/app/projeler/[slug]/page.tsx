@@ -2,12 +2,16 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Script from "next/script";
 import {
-  projects,
   getProjectBySlug,
   getRelatedProjects,
-} from "@/content/projects";
+  listProjectSlugs,
+} from "@/content/projects/service";
 import { Hero } from "@/components/sections/Hero";
 import { CtaBand } from "@/components/sections/CtaBand";
+import { VirtualTour } from "@/components/sections/VirtualTour";
+import { ProjectProgress } from "@/components/sections/ProjectProgress";
+import { PrintCover } from "@/components/print/PrintCover";
+import { PrintButton } from "@/components/ui/PrintButton";
 import {
   ProjectConcept,
   ProjectLocation,
@@ -24,16 +28,18 @@ import {
   realEstateListingJsonLd,
 } from "@/lib/seo";
 import { siteConfig } from "@/content/site.config";
+import { serializeJsonLd } from "@/lib/json-ld";
 
-export function generateStaticParams() {
-  return projects.map((p) => ({ slug: p.slug }));
+export async function generateStaticParams() {
+  const slugs = await listProjectSlugs();
+  return slugs.map((slug) => ({ slug }));
 }
 
 type Params = { params: Promise<{ slug: string }> };
 
 export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const { slug } = await params;
-  const project = getProjectBySlug(slug);
+  const project = await getProjectBySlug(slug);
   if (!project) return buildMetadata({ title: "Proje", path: `/projeler/${slug}` });
   return buildMetadata({
     title: `${project.name} — ${project.locationLabel}`,
@@ -45,10 +51,10 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
 
 export default async function ProjectDetailPage({ params }: Params) {
   const { slug } = await params;
-  const project = getProjectBySlug(slug);
+  const project = await getProjectBySlug(slug);
   if (!project) notFound();
 
-  const related = getRelatedProjects(project.slug, 2);
+  const related = await getRelatedProjects(project.slug, 2);
 
   const residenceLd = {
     "@context": "https://schema.org",
@@ -92,13 +98,19 @@ export default async function ProjectDetailPage({ params }: Params) {
         backgroundImage={project.hero.image.src}
         variant="project"
       />
+      <PrintCover project={project} />
+      <div className="container-page pt-10 flex flex-wrap gap-3" data-print="hide">
+        <PrintButton />
+      </div>
       <ProjectConcept project={project} />
       <ProjectLocation project={project} />
       <ProjectFeatureBand project={project} />
+      <ProjectProgress project={project} />
       <ProjectGallery project={project} />
       <ProjectAmenities project={project} />
       <ProjectSitePlan project={project} />
       <ProjectPlans project={project} />
+      {project.tour && <VirtualTour tour={project.tour} />}
       <CtaBand
         title={project.bottomCta.title}
         description={project.bottomCta.description}
@@ -110,17 +122,17 @@ export default async function ProjectDetailPage({ params }: Params) {
       <Script
         id={`ld-residence-${project.slug}`}
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(residenceLd) }}
+        dangerouslySetInnerHTML={{ __html: serializeJsonLd(residenceLd) }}
       />
       <Script
         id={`ld-listing-${project.slug}`}
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(listingLd) }}
+        dangerouslySetInnerHTML={{ __html: serializeJsonLd(listingLd) }}
       />
       <Script
         id={`ld-breadcrumb-${project.slug}`}
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }}
+        dangerouslySetInnerHTML={{ __html: serializeJsonLd(breadcrumbLd) }}
       />
     </>
   );

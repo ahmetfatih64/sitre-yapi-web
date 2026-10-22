@@ -18,6 +18,7 @@ export function CookieBar() {
         <div
           role="region"
           aria-label="Çerez bilgilendirmesi"
+          data-print="hide"
           className="fixed bottom-0 inset-x-0 z-50 bg-white border-t border-[var(--color-border)] shadow-[var(--shadow-lg)]"
         >
           <div className="container-page py-5 flex flex-col md:flex-row md:items-center gap-4 md:gap-8">

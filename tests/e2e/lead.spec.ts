@@ -54,14 +54,41 @@ test.describe("lead ingest — api contract", () => {
   });
 });
 
+/**
+ * Yönetim yüzeyinin sözleşmesi ortama göre değişir:
+ *
+ *  - Geliştirmede src/lib/auth/session.ts kasıtlı olarak sentetik bir OWNER
+ *    oturumu döndürür, böylece panel veritabanı olmadan denenebilir.
+ *  - Üretimde bu bypass kapalıdır ve koruma devreye girer.
+ *
+ * Bu yüzden testler /api/health üzerinden ortamı okuyup ilgili sözleşmeyi
+ * doğrular. Tek bir sabit beklenti yazmak, dev sunucusunda hiçbir zaman
+ * geçmeyen bir teste yol açıyordu.
+ */
+async function isProduction(
+  request: import("@playwright/test").APIRequestContext
+): Promise<boolean> {
+  const res = await request.get("/api/health");
+  const body = (await res.json()) as { env?: { isProd?: boolean } };
+  return Boolean(body.env?.isProd);
+}
+
 test.describe("admin surface — guarded routes", () => {
-  test("unauthenticated admin redirects to login", async ({ page }) => {
+  test("admin erişimi ortamın sözleşmesine uyar", async ({ page, request }) => {
+    const prod = await isProduction(request);
     const response = await page.goto("/admin/leads");
     expect(response?.status()).toBeLessThan(500);
-    await expect(page).toHaveURL(/\/admin\/login|\/admin$/);
+
+    if (prod) {
+      await expect(page).toHaveURL(/admin\/login/);
+    } else {
+      // Geliştirme bypass'ı açık: panel doğrudan render edilmeli.
+      await expect(page).toHaveURL(/admin\/leads/);
+    }
   });
 
-  test("presign endpoint requires auth", async ({ request }) => {
+  test("presign uç noktası ortamın sözleşmesine uyar", async ({ request }) => {
+    const prod = await isProduction(request);
     const response = await request.post("/api/admin/upload/presign", {
       data: {
         contentType: "image/jpeg",
@@ -72,6 +99,12 @@ test.describe("admin surface — guarded routes", () => {
       headers: { "content-type": "application/json" },
     });
 
-    expect([401, 403]).toContain(response.status());
+    if (prod) {
+      expect([401, 403]).toContain(response.status());
+    } else {
+      // Dev oturumu media.upload iznine sahip OWNER olduğu için istek geçer.
+      expect(response.status()).toBeLessThan(500);
+      expect([401, 403]).not.toContain(response.status());
+    }
   });
 });

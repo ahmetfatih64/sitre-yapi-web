@@ -20,7 +20,7 @@ export function DevLogin() {
     <div className="flex flex-col gap-4">
       <p className="text-sm text-[var(--color-brand-soft)]">
         Geliştirme oturumu — bir rol seç ve giriş yap. Bu mekanizma yalnızca
-        NODE_ENV=development'ta çalışır.
+        NODE_ENV=development&apos;ta çalışır.
       </p>
       <select
         value={actor}

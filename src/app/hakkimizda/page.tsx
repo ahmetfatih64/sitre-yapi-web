@@ -3,6 +3,7 @@ import Image from "next/image";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { CtaBand } from "@/components/sections/CtaBand";
 import { buildMetadata } from "@/lib/seo";
+import { processSteps as steps } from "@/content/process";
 
 export const metadata: Metadata = buildMetadata({
   title: "Hakkımızda",
@@ -34,33 +35,6 @@ const values = [
   },
 ];
 
-const steps = [
-  {
-    n: "01",
-    title: "Fikir",
-    body: "Arsanın ve bağlamın dilini dinleyerek mimari bir fikir kurarız.",
-  },
-  {
-    n: "02",
-    title: "Tasarım",
-    body: "Kütle, peyzaj ve iç mekanı bir bütün olarak çözümleriz.",
-  },
-  {
-    n: "03",
-    title: "İnşaat",
-    body: "Şantiyeyi kendi ekibimizle yönetir; kaliteyi taahhüt altına alırız.",
-  },
-  {
-    n: "04",
-    title: "Teslim",
-    body: "Teslim bir son değil, başlangıç. Kayıt ve evraklar açık.",
-  },
-  {
-    n: "05",
-    title: "Sonrası",
-    body: "Teslim sonrası iletişim ve bakım desteğiyle ilişkiyi sürdürürüz.",
-  },
-];
 
 export default function HakkimizdaPage() {
   return (
@@ -96,7 +70,7 @@ export default function HakkimizdaPage() {
             </div>
             <div className="md:col-span-7 flex flex-col gap-6 text-[var(--color-brand-soft)]">
               <p>
-                Sitre Yapı'yı, klasik müteahhitlik pratiğinin dışında, tasarımın
+                Sitre Yapı&apos;yı, klasik müteahhitlik pratiğinin dışında, tasarımın
                 ve sürecin eşit derecede önemli olduğu bir zemin üzerine kurduk.
                 Her projeye, arsanın dilini ve yaşam bağlamını anlamaya zaman
                 ayırarak başlarız.
@@ -140,7 +114,7 @@ export default function HakkimizdaPage() {
           <ol className="mt-16 grid md:grid-cols-5 gap-px bg-[var(--color-border)]">
             {steps.map((s) => (
               <li key={s.n} className="bg-white p-8">
-                <p className="eyebrow !text-[var(--color-accent)]">{s.n}</p>
+                <p className="eyebrow">{s.n}</p>
                 <h3
                   className="text-xl mt-4"
                   style={{ fontFamily: "var(--font-display)" }}

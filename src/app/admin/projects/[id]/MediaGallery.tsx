@@ -1,3 +1,8 @@
+/* eslint-disable @next/next/no-img-element --
+ * Yüklenen medyanın URL'i çalışma zamanında (R2/yerel adaptör) üretiliyor.
+ * next/image için remotePatterns tanımı gerekir; yönetim paneli önizlemesinde
+ * optimizasyonun getirisi yok.
+ */
 "use client";
 
 import { useState, useTransition } from "react";

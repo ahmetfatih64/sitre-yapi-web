@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { primaryNav } from "@/content/navigation";
 import { siteConfig } from "@/content/site.config";
@@ -13,6 +14,14 @@ export function Header() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const { open } = useQuickContact();
+  const pathname = usePathname();
+
+  // Anasayfa ve proje detayı koyu hero ile açılır. Header bunların üstünde
+  // şeffafken açık renk metne geçmeli; diğer sayfaların üstü açık zeminli
+  // olduğu için koyu metin doğru kalır.
+  const hasDarkHero =
+    pathname === "/" || (pathname?.startsWith("/projeler/") ?? false);
+  const onDark = hasDarkHero && !scrolled && !mobileOpen;
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 24);
@@ -39,11 +48,14 @@ export function Header() {
   return (
     <>
     <header
+      data-print="hide"
       className={cn(
         "fixed top-0 left-0 right-0 z-40 transition-[background,border,color] duration-300",
         scrolled || mobileOpen
           ? "bg-white/95 backdrop-blur border-b border-[var(--color-border)]"
-          : "bg-transparent"
+          : onDark
+            ? "bg-gradient-to-b from-black/55 via-black/25 to-transparent text-white"
+            : "bg-transparent"
       )}
     >
       <div className="container-page flex items-center justify-between py-4 md:py-5">
@@ -67,7 +79,14 @@ export function Header() {
             >
               Sitre <span className="text-[var(--color-accent)]">Yapı</span>
             </span>
-            <span className="text-[10px] uppercase tracking-[0.16em] text-[var(--color-muted)] leading-none mt-0.5">
+            <span
+              className={cn(
+                // Dar ekranda iki satıra kırılıp görselin üstüne taşıyordu;
+                // aynı ibare zaten logo görselinin içinde yer alıyor.
+                "hidden sm:block text-[10px] uppercase tracking-[0.16em] leading-none mt-0.5 whitespace-nowrap",
+                onDark ? "text-white/75" : "text-[var(--color-muted)]"
+              )}
+            >
               Mimarlık - Mühendislik
             </span>
           </div>
@@ -89,20 +108,20 @@ export function Header() {
         </nav>
 
         <div className="hidden lg:flex items-center gap-3">
-          <ContactMenu mode="phone" />
-          <ContactMenu mode="whatsapp" />
+          <ContactMenu mode="phone" onDark={onDark} />
+          <ContactMenu mode="whatsapp" onDark={onDark} />
           <button
             type="button"
-            onClick={() => open()}
-            className="btn btn-primary"
+            onClick={() => open({ context: "header" })}
+            className={cn("btn", onDark ? "btn-on-dark" : "btn-primary")}
           >
             Size Ulaşalım
           </button>
         </div>
 
         <div className="lg:hidden flex items-center gap-2">
-          <ContactMenu mode="phone" />
-          <ContactMenu mode="whatsapp" />
+          <ContactMenu mode="phone" onDark={onDark} />
+          <ContactMenu mode="whatsapp" onDark={onDark} />
         <button
           type="button"
           aria-label={mobileOpen ? "Menüyü kapat" : "Menüyü aç"}
@@ -159,6 +178,7 @@ export function Header() {
         aria-modal="true"
         aria-label="Mobil menü"
         aria-hidden={!mobileOpen}
+        inert={!mobileOpen}
         className="lg:hidden"
         style={{
           position: "fixed",
@@ -233,7 +253,7 @@ export function Header() {
           style={{ borderBottom: "1px solid rgba(230,226,221,0.6)" }}
         >
           <div className="flex flex-col">
-            <span className="eyebrow !text-[var(--color-accent)]">Sitre Yapı</span>
+            <span className="eyebrow">Sitre Yapı</span>
             <span
               className="text-lg mt-1"
               style={{ fontFamily: "var(--font-display)" }}
@@ -319,7 +339,7 @@ export function Header() {
             type="button"
             onClick={() => {
               setMobileOpen(false);
-              open();
+              open({ context: "mobil-menu" });
             }}
             className="btn btn-primary"
             style={{ borderRadius: "999px" }}

@@ -56,7 +56,13 @@ export const leadRepo = {
     subject: string | null;
     projectInterest: string | null;
     source: string;
-    projectId: string | null;
+    /**
+     * Proje slug'ı. Lead.projectId bir yabancı anahtardır (Project.id),
+     * slug değil — eşleme burada yapılır. Eşleşme yoksa ilişki boş bırakılır
+     * ki kısıt ihlali yüzünden talep tamamen kaybolmasın.
+     */
+    projectSlug: string | null;
+    planId: string | null;
     ctaContext: string | null;
     utm: Record<string, string> | null;
     dedupeHash: string;
@@ -64,6 +70,15 @@ export const leadRepo = {
     ipHash: string | null;
     userAgentHash: string | null;
   }): Promise<{ id: string }> {
+    let projectId: string | null = null;
+    if (input.projectSlug) {
+      const match = (await prisma.project.findUnique({
+        where: { slug: input.projectSlug },
+        select: { id: true },
+      })) as { id: string } | null;
+      projectId = match?.id ?? null;
+    }
+
     const created = (await prisma.lead.create({
       data: {
         ...(input.id ? { id: input.id } : {}),
@@ -74,7 +89,10 @@ export const leadRepo = {
         subject: input.subject,
         projectInterest: input.projectInterest,
         source: input.source as never,
-        projectId: input.projectId,
+        // İlişki skaler anahtarla değil connect ile kurulur; Prisma
+        // checked input'ta `projectId` argümanını kabul etmiyor.
+        ...(projectId ? { project: { connect: { id: projectId } } } : {}),
+        planId: input.planId,
         ctaContext: input.ctaContext,
         utm: (input.utm ?? null) as never,
         dedupeHash: input.dedupeHash,

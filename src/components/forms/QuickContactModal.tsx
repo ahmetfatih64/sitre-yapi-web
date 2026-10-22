@@ -5,7 +5,7 @@ import { useQuickContact } from "./QuickContactProvider";
 import { ContactForm } from "./ContactForm";
 
 export function QuickContactModal() {
-  const { isOpen, close, projectHint } = useQuickContact();
+  const { isOpen, close, projectHint, planHint, ctaContext } = useQuickContact();
   const dialogRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -69,6 +69,8 @@ export function QuickContactModal() {
           <ContactForm
             compact
             {...(projectHint ? { defaultProject: projectHint } : {})}
+            {...(planHint ? { planId: planHint } : {})}
+            ctaContext={ctaContext ?? "modal"}
             onSuccess={() => setTimeout(close, 2000)}
           />
         </div>

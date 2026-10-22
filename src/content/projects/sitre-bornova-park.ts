@@ -99,7 +99,6 @@ export const sitreBornovaPark: Project = {
       {
         category: "2+1",
         code: "A-Tipi",
-        image: { src: "/images/placeholders/plan-a.svg", alt: "A-Tipi 2+1" },
         totalArea: 105,
         netArea: 88,
         rooms: [
@@ -113,7 +112,6 @@ export const sitreBornovaPark: Project = {
       {
         category: "3+1",
         code: "B-Tipi",
-        image: { src: "/images/placeholders/plan-b.svg", alt: "B-Tipi 3+1" },
         totalArea: 145,
         netArea: 122,
         rooms: [
@@ -124,6 +122,27 @@ export const sitreBornovaPark: Project = {
           { name: "Yatak odası 3", area: 14 },
           { name: "Banyo", area: 10 },
         ],
+      },
+    ],
+  },
+  progress: {
+    overline: "İnşaat durumu",
+    title: "Tamamlanan süreç.",
+    updatedAt: "Aralık 2024",
+    milestones: [
+      { label: "Ruhsat ve izinler", status: "done", date: "2021 Q3" },
+      { label: "Hafriyat ve zemin iyileştirme", status: "done", date: "2021 Q4" },
+      { label: "Temel ve bodrum", status: "done", date: "2022 Q2" },
+      { label: "Kaba yapı (betonarme)", status: "done", date: "2023 Q1" },
+      { label: "Çatı ve su yalıtımı", status: "done", date: "2023 Q2" },
+      { label: "Cephe ve doğrama", status: "done", date: "2023 Q4" },
+      { label: "İnce yapı ve tesisat", status: "done", date: "2024 Q2" },
+      { label: "Peyzaj ve ortak alanlar", status: "done", date: "2024 Q3" },
+      {
+        label: "Teslim",
+        status: "done",
+        date: "2024 Q4",
+        note: "Tüm bağımsız bölümler hak sahiplerine teslim edildi.",
       },
     ],
   },

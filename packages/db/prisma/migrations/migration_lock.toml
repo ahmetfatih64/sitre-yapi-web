@@ -1,0 +1,2 @@
+# Bu dosya Prisma tarafından okunur. Elle düzenlemeyin.
+provider = "postgresql"

@@ -49,7 +49,7 @@ export function Hero({
           {variant === "project" ? (
             <button
               type="button"
-              onClick={() => open()}
+              onClick={() => open({ context: "proje-hero" })}
               className="btn btn-on-dark"
             >
               {primaryLabel}
@@ -61,7 +61,7 @@ export function Hero({
           ) : (
             <button
               type="button"
-              onClick={() => open()}
+              onClick={() => open({ context: "proje-hero" })}
               className="btn btn-on-dark"
             >
               {primaryLabel}

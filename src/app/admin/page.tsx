@@ -19,7 +19,7 @@ export default async function AdminHome() {
         <p className="text-sm text-[var(--color-brand-soft)] mt-2">
           Bu panel, içerik, talep ve medya yönetimi için merkezi yüzeydir.
           Üretim ortamına geçiş için DATABASE_URL ve NEXTAUTH_SECRET sağlandığında
-          oturum iskeleti gerçek auth'a bağlanır.
+          oturum iskeleti gerçek auth&apos;a bağlanır.
         </p>
       </div>
 

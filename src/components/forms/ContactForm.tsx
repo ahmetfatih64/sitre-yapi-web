@@ -10,10 +10,23 @@ import { cn } from "@/lib/utils";
 type Props = {
   compact?: boolean;
   defaultProject?: string;
+  /** Plan kodu; talebin hangi daire tipiyle ilgili olduğunu kaydeder. */
+  planId?: string;
+  /** Talebi doğuran düğmenin kimliği; hangi yüzeyin işe yaradığını ölçer. */
+  ctaContext?: string;
+  /** Talebin geldiği sayfa/yüzey. */
+  source?: string;
   onSuccess?: () => void;
 };
 
-export function ContactForm({ compact = false, defaultProject, onSuccess }: Props) {
+export function ContactForm({
+  compact = false,
+  defaultProject,
+  planId,
+  ctaContext,
+  source = "web_form",
+  onSuccess,
+}: Props) {
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">(
     "idle"
   );
@@ -40,7 +53,14 @@ export function ContactForm({ compact = false, defaultProject, onSuccess }: Prop
       const res = await fetch("/api/contact", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(values),
+        // Bağlam alanları formda görünmez; şema bunları opsiyonel kabul eder.
+        body: JSON.stringify({
+          ...values,
+          source,
+          ...(defaultProject ? { projectId: defaultProject } : {}),
+          ...(planId ? { planId } : {}),
+          ...(ctaContext ? { ctaContext } : {}),
+        }),
       });
       if (!res.ok) {
         const body = await res.json().catch(() => ({}));
@@ -49,7 +69,7 @@ export function ContactForm({ compact = false, defaultProject, onSuccess }: Prop
       setStatus("success");
       reset();
       onSuccess?.();
-    } catch (err) {
+    } catch {
       setStatus("error");
       setServerError(
         "İsteğiniz şu anda iletilemiyor. Kısa süre sonra tekrar denemenizi rica ederiz."
@@ -160,7 +180,7 @@ export function ContactForm({ compact = false, defaultProject, onSuccess }: Prop
             <a href="/kvkk" target="_blank" className="underline">
               KVKK Aydınlatma Metni
             </a>
-            'ni okudum, kişisel verilerimin işlenmesini kabul ediyorum.
+            &apos;ni okudum, kişisel verilerimin işlenmesini kabul ediyorum.
           </span>
         </label>
         {errors.consent?.message && (

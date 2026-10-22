@@ -9,6 +9,14 @@ interface ContactMenuProps {
   mode: ContactMode;
   variant?: "header" | "floating";
   className?: string;
+  /** Şeffaf header koyu hero üstündeyken açık renk kenarlık kullan. */
+  onDark?: boolean;
+  /**
+   * WhatsApp mesajına önceden yazılacak bağlam. Türkiye'de form doldurmaktan
+   * çok daha yüksek dönüşüm veren yol; karşı taraf neyle ilgilendiğini
+   * ilk mesajda görür.
+   */
+  contextLabel?: string;
 }
 
 const COPY: Record<ContactMode, { label: string; title: string; hint: string }> = {
@@ -32,10 +40,21 @@ function toWaDigits(phone: string): string {
   return phone.replace(/[^\d]/g, "");
 }
 
+
+/** wa.me bağlantısı; bağlam verilmişse mesaj önceden doldurulur. */
+function waHref(phone: string, contextLabel?: string): string {
+  const base = `https://wa.me/${toWaDigits(phone)}`;
+  if (!contextLabel) return base;
+  const text = `Merhaba, ${contextLabel} hakkında bilgi almak istiyorum.`;
+  return `${base}?text=${encodeURIComponent(text)}`;
+}
+
 export function ContactMenu({
   mode,
   variant = "header",
   className,
+  onDark = false,
+  contextLabel,
 }: ContactMenuProps) {
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
@@ -60,7 +79,10 @@ export function ContactMenu({
   const buttonBase =
     variant === "floating"
       ? "w-14 h-14 rounded-full shadow-lg transition-colors text-white"
-      : "w-11 h-11 rounded-full border border-[var(--color-border)] hover:border-[var(--color-brand)] transition-colors flex items-center justify-center";
+      : "w-11 h-11 rounded-full border transition-colors flex items-center justify-center " +
+        (onDark
+          ? "border-white/45 hover:border-white"
+          : "border-[var(--color-border)] hover:border-[var(--color-brand)]");
 
   const floatingColor =
     mode === "whatsapp"
@@ -123,7 +145,7 @@ export function ContactMenu({
               const href =
                 mode === "phone"
                   ? f.phoneHref
-                  : `https://wa.me/${toWaDigits(f.phone)}`;
+                  : waHref(f.phone, contextLabel);
               const extraProps =
                 mode === "whatsapp"
                   ? { target: "_blank", rel: "noopener noreferrer" as const }

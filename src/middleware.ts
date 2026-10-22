@@ -4,6 +4,21 @@ import { lookupRedirect } from "@/lib/security/redirects";
 
 const isProd = process.env.NODE_ENV === "production";
 
+/**
+ * Her istekte sunucuda render edilen rotalar. Yalnızca bunlar nonce'lu
+ * katı politikayı alabilir; statik üretilen sayfalar alamaz.
+ *
+ * Bir sayfaya `export const dynamic = "force-dynamic"` eklenirse yolunu
+ * buraya da eklemek gerekir, aksi halde gereğinden zayıf politika alır.
+ */
+const DYNAMIC_PREFIXES = ["/admin", "/api"] as const;
+
+function isDynamicRoute(pathname: string): boolean {
+  return DYNAMIC_PREFIXES.some(
+    (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`)
+  );
+}
+
 function generateNonce(): string {
   const bytes = new Uint8Array(16);
   crypto.getRandomValues(bytes);
@@ -22,12 +37,29 @@ export function middleware(req: NextRequest) {
     return NextResponse.redirect(url, redirect.statusCode);
   }
 
-  const nonce = generateNonce();
-  const csp = buildCsp({ nonce, isDev: !isProd });
-
   const requestHeaders = new Headers(req.headers);
-  requestHeaders.set("x-nonce", nonce);
-  requestHeaders.set("x-csp", csp);
+  let csp: string;
+
+  if (isDynamicRoute(pathname)) {
+    // Bu rotalar her istekte sunucuda render edilir, dolayısıyla istek
+    // başına üretilen nonce script etiketlerine basılabilir.
+    const nonce = generateNonce();
+    csp = buildCsp({ nonce, isDev: !isProd, mode: "nonce" });
+    /**
+     * Next.js nonce'u yalnızca İSTEK üzerindeki `Content-Security-Policy`
+     * başlığından okur ve kendi <script> etiketlerine onu basar. Bu satır
+     * olmadan script'ler nonce'suz üretilir ve `strict-dynamic` varken
+     * `'self'` yok sayıldığı için tarayıcı hepsini engeller.
+     */
+    requestHeaders.set("Content-Security-Policy", csp);
+  } else {
+    // Herkese açık sayfalar build sırasında statik üretilir. Next.js RSC
+    // verisini o HTML'e satır içi <script> olarak gömer ve bunlara istek
+    // nonce'u basılamaz, dolayısıyla nonce'lu politika bu sayfalarda tüm
+    // JavaScript'i engeller. Bu rotalarda kullanıcı üretimi HTML
+    // render edilmediği için satır içi script'e izin vermek kabul edilebilir.
+    csp = buildCsp({ isDev: !isProd, mode: "static" });
+  }
 
   const res = NextResponse.next({ request: { headers: requestHeaders } });
 

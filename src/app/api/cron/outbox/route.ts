@@ -9,7 +9,7 @@ export const dynamic = "force-dynamic";
 const BATCH_SIZE = 25;
 
 function authorized(req: Request): boolean {
-  const expected = process.env.CRON_SECRET;
+  const expected = env.CRON_SECRET;
   if (!expected) return !env.IS_PROD;
   const header = req.headers.get("authorization");
   return header === `Bearer ${expected}`;

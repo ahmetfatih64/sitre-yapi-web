@@ -174,6 +174,34 @@ Bu dosya sitenin **en kritik** şablonunun içerik sözleşmesidir. Referans tas
 
 ---
 
+## 8b. İnşaat ilerlemesi (opsiyonel)
+
+**Amaç:** Alıcının en çok sorduğu soruya cevap: "proje şu an nerede?"
+
+**İçerik alanları** (`progress`, tamamen opsiyonel — verilmezse bölüm hiç çıkmaz):
+- `progress.overline` / `progress.title`
+- `progress.updatedAt` — verinin en son ne zaman doğrulandığı. Vitrinde
+  gösterilir; **güncel tutulmazsa yazılmamalıdır**, eski tarih güven kaybettirir.
+- `progress.milestones[]` — her biri `{ label, status, date?, note? }`
+  - `status`: `done` | `active` | `planned`
+  - Aynı anda **en fazla bir** aşama `active` olabilir
+  - Biten bir aşama, bitmemiş bir aşamadan sonra gelemez
+
+**Yüzde elle girilmez.** `src/lib/progress.ts` aşamalardan hesaplar: biten
+aşamalar tam, süren aşama yarım sayılır. Elle girilseydi aşamalar
+güncellenince yüzde geride kalır ve sayfa kendi kendisiyle çelişirdi.
+
+**Nöbetçi:** `src/content/projects/progress-data.test.ts` gerçek veriyi
+denetler — sıralama tutarlılığı, tamamlanmış projenin %100 olması,
+tamamlanmamış projenin %100 görünmemesi, tarihlerin dolu olması, aşamaların
+tekrar etmemesi. Veri yanlışsa test düşer.
+
+> Tipik aşama dizisi: Ruhsat ve izinler → Hafriyat ve zemin iyileştirme →
+> Temel ve bodrum → Kaba yapı (betonarme) → Çatı ve su yalıtımı → Cephe ve
+> doğrama → İnce yapı ve tesisat → Peyzaj ve ortak alanlar → Teslim
+
+---
+
 ## 9. Section 8 — Daire / plan tipleri
 
 **Amaç:** Alıcının kendi senaryosunu görmesi: “ben hangi daireyi alırım?”
@@ -185,16 +213,41 @@ Bu dosya sitenin **en kritik** şablonunun içerik sözleşmesidir. Referans tas
 - `plans.items[]` — her biri:
   - `category` — yukarıdaki kategorilerden
   - `code` — örn: “A-Tipi”
-  - `image` — plan görseli (SVG tercih)
+  - `image` — **opsiyonel.** Gerçek mimari plan çizimi (SVG tercih). Verilmezse
+    plan `rooms[]` alanlarından şematik olarak üretilir.
   - `totalArea` — toplam m²
   - `netArea` — net m²
   - `rooms[]` — `{ name, area }` (örn: salon, yatak odası 1, banyo, balkon)
-  - `orientation` — cephe yönü
+  - `orientation` — cephe yönü. Kuzey okunu döndürür; tanınan değerler:
+    Kuzey, Kuzey-Doğu, Doğu, Güney-Doğu, Güney, Güney-Batı, Batı, Kuzey-Batı.
+    Tanınmayan değerde ok hiç çizilmez (yanlış yön göstermez).
   - `floorRange` — kat aralığı (örn: “2–8. kat”)
 
+**Plan görseli nasıl seçilir:**
+
+| Durum | Ne gösterilir |
+|---|---|
+| `image` **yok** | `rooms[]` alanlarından üretilen şematik plan — kutular m² ile orantılı, odalar işlevlerine göre renklenir, oda listesiyle karşılıklı vurgulanır |
+| `image` **var** | Yalnızca o çizim. Üretilen şema devre dışı kalır; oda dökümü listesi her iki durumda da kalır |
+
+Üretilen plan `src/lib/floorplan.ts` içindeki yerleşim algoritmasından gelir ve
+`src/lib/floorplan.test.ts` ile korunur (çakışmama, sınır taşmaması, m² oranı,
+okunabilir en-boy oranı). Şematik gösterimin altında “ölçekli mimari çizim
+değildir” notu **kalmalıdır** — kaldırılırsa şema gerçek çizim sanılır.
+
+> **Müşteri gerçek projelerini verdiğinde:** her plan için `image` alanını
+> doldurmak yeterlidir, başka kod değişikliği gerekmez. `rooms[]` yine de
+> doldurulmalıdır; oda dökümü ve karşılaştırma tablosu bu veriyi kullanır.
+> Veri değiştikten sonra `npm run db:seed` çalıştırılmalıdır — site içeriği
+> veritabanından okur, yalnızca TS dosyasını değiştirmek yayına yansımaz.
+
 **Davranış:**
-- Kategori sekmesi → slider.
+- Kategori sekmesi → o kategorinin planları.
+- “Planları karşılaştır” → tüm plan tipleri kolon kolon; brüt/net alan, bölüm
+  sayısı, cephe ve kat satır satır hizalanır. En az 2 plan varsa görünür.
 - Her karttan “Bu plan için bilgi al” CTA’sı quick-contact modalını **o plan seçili** açar.
+- Dar ekranda şema üzerindeki oda adları gizlenir, yalnızca m² kalır; adlar
+  altındaki oda dökümünde tam haliyle görünür.
 
 **Editoryal kurallar:**
 - Tablo okunabilir, cm² değil m².

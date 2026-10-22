@@ -75,7 +75,12 @@ export type Project = {
     items: {
       category: string;
       code: string;
-      image: { src: string; alt: string };
+      /**
+       * Gercek mimari plan cizimi. Verilmezse plan `rooms` alanlarindan
+       * sematik olarak uretilir; musteri kendi cizimlerini verdiginde
+       * bu alan doldurulup uretilen sema devre disi kalir.
+       */
+      image?: { src: string; alt: string };
       totalArea: number;
       netArea: number;
       rooms: { name: string; area: number }[];
@@ -83,9 +88,42 @@ export type Project = {
       floorRange?: string;
     }[];
   };
+  /**
+   * İnşaat ilerlemesi. Yüzde burada tutulmaz; aşamalardan hesaplanır
+   * (`src/lib/progress.ts`), böylece aşamalar güncellenince yüzde
+   * kendiliğinden doğru kalır.
+   */
+  progress?: {
+    overline: string;
+    title: string;
+    /** Verinin en son ne zaman doğrulandığı; vitrinde gösterilir. */
+    updatedAt?: string;
+    milestones: {
+      label: string;
+      status: "done" | "active" | "planned";
+      date?: string;
+      note?: string;
+    }[];
+  };
   tour?: {
     available: boolean;
+    /**
+     * Harici 360° tur (ör. Matterport) gömme adresi. Üçüncü tarafa istek
+     * gittiği için pazarlama onayına bağlı yüklenir. `panorama` verilmişse
+     * o önceliklidir.
+     */
     embedUrl?: string;
+    /** Kendi sunucumuzdan servis edilen eşdikdörtgen panorama. */
+    panorama?: {
+      wide: string;
+      narrow: string;
+      poster: string;
+      posterAlt: string;
+      initialYaw?: number;
+      credit?: string;
+      /** Temsilî görselse arayüzde açıkça belirtilir. */
+      isConcept?: boolean;
+    };
   };
   bottomCta: {
     title: string;

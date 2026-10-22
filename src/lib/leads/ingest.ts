@@ -3,6 +3,7 @@ import { rateLimit } from "@/lib/security/rate-limit";
 import { verifyTurnstile } from "@/lib/security/turnstile";
 import { buildDedupeHash, sha256 } from "./hash";
 import { emitLeadReceived } from "./outbox";
+import { notifyLeadDirectly } from "./direct-notify";
 import { CURRENT_CONSENT_POLICY_VERSION } from "@/lib/consent/policy";
 import { env } from "@/lib/env";
 import { leadRepo } from "@sitre/db/repos/lead";
@@ -130,6 +131,10 @@ export async function ingestLead(input: {
     userAgentHash: uaHash,
   };
 
+  // Talebin kalıcı olarak kaydedilip kaydedilmediğini takip et. Bu bayrak
+  // olmadan veritabanı erişilemezken kullanıcıya "iletildi" deniyordu.
+  let persisted = false;
+
   if (env.HAS_DB) {
     try {
       await leadRepo.create({
@@ -141,7 +146,8 @@ export async function ingestLead(input: {
         subject: record.subject,
         projectInterest: record.projectInterest,
         source: normalizeSource(record.source),
-        projectId: record.projectId,
+        projectSlug: record.projectId,
+        planId: record.planId,
         ctaContext: record.ctaContext,
         utm: record.utm,
         dedupeHash: record.dedupeHash,
@@ -149,22 +155,43 @@ export async function ingestLead(input: {
         ipHash: record.ipHash,
         userAgentHash: record.userAgentHash,
       });
+      persisted = true;
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : "unknown";
-      console.warn("[lead-ingest] db persist failed:", message);
+      console.error("[lead-ingest] veritabanına yazılamadı:", message);
     }
   }
 
+  // Outbox yalnızca veritabanı varken kalıcıdır; aksi halde log adaptörüne
+  // düşer ve hiçbir yere ulaşmaz.
+  let queued = false;
   try {
     await emitLeadReceived(record);
+    queued = env.HAS_DB && persisted;
   } catch (e) {
     console.error("[lead-ingest] outbox failure", e);
-    return {
-      ok: false,
-      code: "server_error",
-      message: "İstek alındı fakat bildirim iletilemedi.",
-    };
   }
 
-  return { ok: true, id, deduped: false };
+  if (persisted || queued) {
+    return { ok: true, id, deduped: false };
+  }
+
+  // Buraya düşmek talebin hiçbir kalıcı yerde olmadığı anlamına gelir.
+  // Son çare: kuyruğu atlayıp doğrudan bildir.
+  const notified = await notifyLeadDirectly(record);
+  if (notified) {
+    console.warn("[lead-ingest] talep doğrudan bildirim ile kurtarıldı:", id);
+    return { ok: true, id, deduped: false };
+  }
+
+  // Hiçbir yol işlemedi. Başarılı taklidi yapmak müşteri kaybettirir;
+  // kullanıcıya doğrudan iletişim seçeneği sunulur.
+  console.error("[lead-ingest] TALEP KAYBEDİLDİ — hiçbir kanal çalışmadı:", id);
+  return {
+    ok: false,
+    code: "server_error",
+    message:
+      "Mesajınızı şu anda kaydedemiyoruz. Lütfen bizi telefonla veya " +
+      "WhatsApp üzerinden arayın; talebinizi hemen alalım.",
+  };
 }

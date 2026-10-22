@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import Link from "next/link";
+import { HeroVideo } from "@/components/sections/HeroVideo";
+import { BrandPromise } from "@/components/sections/BrandPromise";
 import { FeaturedProjects } from "@/components/sections/FeaturedProjects";
+import { LifeOnSite } from "@/components/sections/LifeOnSite";
 import { ServicesOverview } from "@/components/sections/ServicesOverview";
 import { CorporateStats } from "@/components/sections/CorporateStats";
 import { CtaBand } from "@/components/sections/CtaBand";
@@ -22,14 +24,7 @@ export default function HomePage() {
         className="relative md:h-screen flex flex-col md:block overflow-hidden"
         style={{ background: "var(--color-brand)" }}
       >
-        <video
-          src="/images/stock/anasayfa_player.mp4"
-          autoPlay
-          loop
-          muted
-          playsInline
-          className="w-full aspect-video object-cover md:absolute md:inset-0 md:w-full md:h-full"
-        />
+        <HeroVideo />
         {/* Gradient — sadece masaüstünde video üstünde; mobilde metin ayrı blokta */}
         <div
           className="absolute inset-0 hidden md:block"
@@ -77,32 +72,9 @@ export default function HomePage() {
           </div>
         </div>
       </section>
-      <section className="section">
-        <div className="container-page">
-          <p className="eyebrow mb-8">Marka vaadi</p>
-          <h2 className="display-lg max-w-4xl">
-            Az sayıda ama derinlemesine düşünülmüş projeler.
-          </h2>
-          <p className="lede mt-8 max-w-3xl">
-            Sitre Yapı, tasarım odaklı ve süreç şeffaflığına önem veren bir
-            yapı geliştiricisidir. Her proje, bulunduğu yerin mimari
-            diliyle başlar; teslim sonrasına uzanan uzun vadeli bir ilişki
-            ile devam eder.
-          </p>
-        </div>
-        <div className="container-page mt-16">
-          <div className="relative aspect-[4/3] md:aspect-[21/9] overflow-hidden">
-            <Image
-              src="/images/stock/brand-promise.jpg"
-              alt="Modern mimari cephe detayı"
-              fill
-              className="object-cover"
-              sizes="(max-width: 1440px) 100vw, 1440px"
-            />
-          </div>
-        </div>
-      </section>
+      <BrandPromise />
       <FeaturedProjects />
+      <LifeOnSite />
       <ServicesOverview />
       <CorporateStats />
       <CtaBand

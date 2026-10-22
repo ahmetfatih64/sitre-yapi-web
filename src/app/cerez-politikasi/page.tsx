@@ -1,3 +1,7 @@
+/* eslint-disable react/no-danger --
+ * Yasal metin src/content/legal/ altındaki statik TS sabitinden geliyor.
+ * Kullanıcı girdisi bu HTML'e hiç ulaşmıyor, bu yüzden XSS yüzeyi yok.
+ */
 import type { Metadata } from "next";
 import { cerezDoc } from "@/content/legal/cerez-politikasi";
 import { buildMetadata } from "@/lib/seo";

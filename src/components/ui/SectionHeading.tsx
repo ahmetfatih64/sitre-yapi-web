@@ -7,6 +7,8 @@ type Props = {
   align?: "left" | "center";
   size?: "md" | "lg" | "xl";
   as?: "h1" | "h2" | "h3";
+  /** "dark" = koyu zemin üstünde açık renk metin. */
+  tone?: "light" | "dark";
   className?: string;
 };
 
@@ -17,6 +19,7 @@ export function SectionHeading({
   align = "left",
   size = "lg",
   as: Tag = "h2",
+  tone = "light",
   className,
 }: Props) {
   const sizeClass =
@@ -30,8 +33,14 @@ export function SectionHeading({
       )}
     >
       {overline ? <span className="eyebrow">{overline}</span> : null}
-      <Tag className={sizeClass}>{title}</Tag>
-      {description ? <p className="lede">{description}</p> : null}
+      <Tag className={cn(sizeClass, tone === "dark" && "text-white")}>
+        {title}
+      </Tag>
+      {description ? (
+        <p className={cn("lede", tone === "dark" && "!text-white/70")}>
+          {description}
+        </p>
+      ) : null}
     </div>
   );
 }

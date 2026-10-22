@@ -99,7 +99,6 @@ export const sitreCesmeResidence: Project = {
       {
         category: "1+1",
         code: "A-Tipi",
-        image: { src: "/images/placeholders/plan-a.svg", alt: "A-Tipi 1+1" },
         totalArea: 75,
         netArea: 60,
         rooms: [
@@ -113,7 +112,6 @@ export const sitreCesmeResidence: Project = {
       {
         category: "2+1",
         code: "B-Tipi",
-        image: { src: "/images/placeholders/plan-b.svg", alt: "B-Tipi 2+1" },
         totalArea: 115,
         netArea: 95,
         rooms: [
@@ -128,7 +126,6 @@ export const sitreCesmeResidence: Project = {
       {
         category: "3+1",
         code: "C-Tipi",
-        image: { src: "/images/placeholders/plan-c.svg", alt: "C-Tipi 3+1" },
         totalArea: 165,
         netArea: 138,
         rooms: [

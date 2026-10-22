@@ -2,12 +2,18 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import type { Project } from "@/content/projects";
+import { statusLabel } from "@/content/projects";
 import { SectionHeading } from "@/components/ui/SectionHeading";
+import { Reveal } from "@/components/ui/Reveal";
 import { EmbedMap } from "@/components/ui/EmbedMap";
+import { WhatsAppCta } from "@/components/ui/WhatsAppCta";
+import { PlanExplorer } from "@/components/ui/FloorPlan";
+import { PlanComparison } from "@/components/sections/PlanComparison";
+import { PlanSheets } from "@/components/print/PlanSheets";
 import { useQuickContact } from "@/components/forms/QuickContactProvider";
-import { formatArea } from "@/lib/utils";
+import { formatArea, deliveryLabel } from "@/lib/utils";
 
 export function ProjectConcept({ project }: { project: Project }) {
   const c = project.concept;
@@ -108,8 +114,8 @@ export function ProjectLocation({ project }: { project: Project }) {
 
 export function ProjectFeatureBand({ project }: { project: Project }) {
   return (
-    <section className="py-20 bg-[var(--color-bg-dark)] text-white">
-      <div className="container-page">
+    <section className="py-20 bg-[var(--color-bg-dark)] text-white grain relative overflow-hidden">
+      <div className="container-page relative z-[2]">
         <ul className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-px bg-white/10">
           {project.features.map((f) => (
             <li
@@ -137,6 +143,7 @@ export function ProjectGallery({ project }: { project: Project }) {
   const g = project.gallery;
   const [filter, setFilter] = useState<string>("Tümü");
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
+  const dialogRef = useRef<HTMLDivElement>(null);
   const items =
     filter === "Tümü" ? g.items : g.items.filter((i) => i.category === filter);
   const categories = ["Tümü", ...g.categories];
@@ -159,12 +166,46 @@ export function ProjectGallery({ project }: { project: Project }) {
 
   useEffect(() => {
     if (lightboxIndex === null) return;
+
+    // aria-modal="true" olan bir diyalogda odak dışarı çıkmamalı; aksi halde
+    // klavye kullanıcısı arkadaki küçük resimlere sekmeyle geçebiliyor.
+    const focusablesIn = (root: HTMLElement) =>
+      Array.from(
+        root.querySelectorAll<HTMLElement>(
+          'a[href],button:not([disabled]),[tabindex]:not([tabindex="-1"])'
+        )
+      ).filter((el) => el.offsetParent !== null);
+
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") close();
-      if (e.key === "ArrowRight") next();
-      if (e.key === "ArrowLeft") prev();
+      if (e.key === "Escape") return close();
+      if (e.key === "ArrowRight") return next();
+      if (e.key === "ArrowLeft") return prev();
+      if (e.key !== "Tab") return;
+
+      const root = dialogRef.current;
+      if (!root) return;
+      const items = focusablesIn(root);
+      if (items.length === 0) return;
+      const first = items[0];
+      const last = items[items.length - 1];
+      if (!first || !last) return;
+      const current = document.activeElement as HTMLElement | null;
+
+      if (!current || !root.contains(current)) {
+        e.preventDefault();
+        first.focus();
+        return;
+      }
+      if (e.shiftKey && current === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && current === last) {
+        e.preventDefault();
+        first.focus();
+      }
     };
     window.addEventListener("keydown", onKey);
+    dialogRef.current?.querySelector<HTMLElement>("button")?.focus();
     const prevOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     return () => {
@@ -229,6 +270,7 @@ export function ProjectGallery({ project }: { project: Project }) {
 
       {active && (
         <div
+          ref={dialogRef}
           className="fixed inset-0 z-[90] bg-black/90 backdrop-blur-sm flex items-center justify-center p-4"
           role="dialog"
           aria-modal="true"
@@ -344,42 +386,77 @@ export function ProjectSitePlan({ project }: { project: Project }) {
 export function ProjectPlans({ project }: { project: Project }) {
   const p = project.plans;
   const [active, setActive] = useState<string>(p.categories[0] ?? "");
+  const [compare, setCompare] = useState(false);
   const items = p.items.filter((i) => i.category === active);
+  const canCompare = p.items.length > 1;
   const { open } = useQuickContact();
   return (
     <section className="section bg-[var(--color-bg-alt)]" id="planlar">
       <div className="container-page">
         <SectionHeading overline={p.overline} title={p.title} />
-        <div className="mt-10 flex gap-2 flex-wrap">
-          {p.categories.map((c) => (
+        <div
+          className="mt-10 flex flex-wrap items-center justify-between gap-4"
+          data-print="hide"
+        >
+          <div className="flex gap-2 flex-wrap">
+            {p.categories.map((c) => (
+              <button
+                key={c}
+                type="button"
+                onClick={() => {
+                  setActive(c);
+                  setCompare(false);
+                }}
+                aria-pressed={!compare && active === c}
+                className={
+                  "px-5 py-3 text-xs uppercase tracking-[0.14em] border transition-colors " +
+                  (!compare && active === c
+                    ? "bg-[var(--color-brand)] text-white border-[var(--color-brand)]"
+                    : "border-[var(--color-border)] hover:border-[var(--color-brand)]")
+                }
+              >
+                {c}
+              </button>
+            ))}
+          </div>
+          {canCompare && (
             <button
-              key={c}
               type="button"
-              onClick={() => setActive(c)}
+              onClick={() => setCompare((v) => !v)}
+              aria-pressed={compare}
               className={
                 "px-5 py-3 text-xs uppercase tracking-[0.14em] border transition-colors " +
-                (active === c
+                (compare
                   ? "bg-[var(--color-brand)] text-white border-[var(--color-brand)]"
                   : "border-[var(--color-border)] hover:border-[var(--color-brand)]")
               }
             >
-              {c}
+              {compare ? "Tek plan görünümü" : "Planları karşılaştır"}
             </button>
-          ))}
+          )}
         </div>
-        <div className="mt-12 grid gap-10">
+        {compare && (
+          <div
+            className="mt-12 bg-white p-6 md:p-10 border border-[var(--color-border)]"
+            data-print="hide"
+          >
+            <PlanComparison project={project} />
+          </div>
+        )}
+        <div
+          className={compare ? "hidden" : "mt-12 grid gap-10"}
+          data-print="hide"
+        >
           {items.map((it) => (
             <article
               key={it.code}
               className="grid md:grid-cols-12 gap-10 bg-white p-6 md:p-10 border border-[var(--color-border)]"
             >
-              <div className="md:col-span-6 relative aspect-[4/3] bg-[var(--color-bg-alt)]">
-                <Image
-                  src={it.image.src}
-                  alt={it.image.alt}
-                  fill
-                  sizes="(min-width: 768px) 50vw, 100vw"
-                  className="object-contain"
+              <div className="md:col-span-6">
+                <PlanExplorer
+                  rooms={it.rooms}
+                  orientation={it.orientation}
+                  image={it.image}
                 />
               </div>
               <div className="md:col-span-6 flex flex-col">
@@ -412,37 +489,32 @@ export function ProjectPlans({ project }: { project: Project }) {
                     </>
                   )}
                 </dl>
-                <div className="mt-6 pt-6 border-t border-[var(--color-border)]">
-                  <p className="eyebrow mb-3">Oda dağılımı</p>
-                  <ul className="grid grid-cols-2 gap-y-2 text-sm">
-                    {it.rooms.map((r) => (
-                      <li
-                        key={r.name}
-                        className="flex justify-between gap-3 pr-4"
-                      >
-                        <span className="text-[var(--color-brand-soft)]">
-                          {r.name}
-                        </span>
-                        <span className="tabular-nums">
-                          {formatArea(r.area)}
-                        </span>
-                      </li>
-                    ))}
-                  </ul>
+                <div className="flex flex-wrap gap-3 self-start mt-8">
+                  <button
+                    type="button"
+                    onClick={() =>
+                      open({
+                        project: project.slug,
+                        plan: it.code,
+                        context: "kat-plani",
+                      })
+                    }
+                    className="btn btn-primary"
+                  >
+                    Bu plan için bilgi al
+                  </button>
+                  <WhatsAppCta
+                    contextLabel={`${project.name} — ${it.code} (${it.category})`}
+                    className="btn btn-outline"
+                  >
+                    WhatsApp&apos;tan sor
+                  </WhatsAppCta>
                 </div>
-                <button
-                  type="button"
-                  onClick={() =>
-                    open({ project: project.slug, plan: it.code })
-                  }
-                  className="btn btn-primary self-start mt-8"
-                >
-                  Bu plan için bilgi al
-                </button>
               </div>
             </article>
           ))}
         </div>
+        <PlanSheets project={project} />
       </div>
     </section>
   );
@@ -463,9 +535,11 @@ export function RelatedProjects({
             Tümünü gör →
           </Link>
         </div>
-        <div className="grid md:grid-cols-2 gap-10">
-          {related.map((p) => (
-            <RelatedCard key={p.slug} project={p} />
+        <div className="grid md:grid-cols-2 gap-8">
+          {related.map((p, i) => (
+            <Reveal key={p.slug} delay={i * 110}>
+              <RelatedCard project={p} />
+            </Reveal>
           ))}
         </div>
       </div>
@@ -474,28 +548,53 @@ export function RelatedProjects({
 }
 
 function RelatedCard({ project }: { project: Project }) {
+  const delivery = deliveryLabel(
+    project.features.find((f) => f.label === "Teslim")?.value
+  );
   return (
     <Link
       href={`/projeler/${project.slug}`}
-      className="group block"
+      className="slide-card slide-card--wide group"
+      aria-label={`${project.name} — ${project.locationLabel}`}
     >
-      <div className="relative aspect-[16/10] bg-[var(--color-border)] overflow-hidden">
+      <div className="slide-card__media">
         <Image
           src={project.coverImage.src}
           alt={project.coverImage.alt}
           fill
           sizes="(min-width: 768px) 50vw, 100vw"
-          className="object-cover group-hover:scale-105 transition-transform duration-700"
+          className="object-cover"
         />
-      </div>
-      <div className="pt-5">
-        <p className="eyebrow">{project.locationLabel}</p>
-        <h3
-          className="text-2xl mt-2"
-          style={{ fontFamily: "var(--font-display)" }}
-        >
-          {project.name}
-        </h3>
+        <span className="slide-card__veil" aria-hidden />
+        <span className="slide-card__status">{statusLabel[project.status]}</span>
+
+        <div className="slide-card__body">
+          <p className="eyebrow mb-3">
+            {project.locationLabel}
+            {delivery ? (
+              <>
+                <span className="slide-card__dot" aria-hidden>
+                  ·
+                </span>
+                <span className="text-white/55">{delivery}</span>
+              </>
+            ) : null}
+          </p>
+          <h3
+            className="text-[1.6rem] leading-tight text-white"
+            style={{ fontFamily: "var(--font-display)" }}
+          >
+            {project.name}
+          </h3>
+          <span className="slide-card__reveal">
+            <span className="slide-card__summary">{project.shortSummary}</span>
+            <span className="slide-card__rule" aria-hidden />
+            <span className="slide-card__cta">
+              Detayları incele
+              <span aria-hidden>→</span>
+            </span>
+          </span>
+        </div>
       </div>
     </Link>
   );

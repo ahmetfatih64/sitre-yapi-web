@@ -1,0 +1,36 @@
+# Yerel geliştirme yığını: PostgreSQL + SMTP yakalayıcı.
+#
+#   docker compose -f docker-compose.dev.yml up -d
+#
+# Postgres 5433'te (olası yerel bir 5432 ile çakışmasın diye).
+# Mailpit arayüzü: http://localhost:8025 — giden e-postalar burada birikir,
+# dışarı çıkmaz. Magic-link girişini Postmark hesabı olmadan test etmeyi sağlar.
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: sitre-postgres
+    environment:
+      POSTGRES_USER: sitre
+      POSTGRES_PASSWORD: sitre_dev_local
+      POSTGRES_DB: sitre
+    ports:
+      - "5433:5432"
+    volumes:
+      - sitre-pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U sitre -d sitre"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  mailpit:
+    image: axllent/mailpit:latest
+    container_name: sitre-mail
+    ports:
+      - "1025:1025"   # SMTP
+      - "8025:8025"   # web arayüzü
+    environment:
+      MP_MAX_MESSAGES: 500
+
+volumes:
+  sitre-pgdata:

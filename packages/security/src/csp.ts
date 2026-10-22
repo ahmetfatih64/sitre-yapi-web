@@ -2,9 +2,26 @@
  * Content-Security-Policy builder. Shared between the public web app
  * and (future) admin app so security policy stays single-sourced.
  */
+/**
+ * Hangi script politikasinin uretilecegi.
+ *
+ * - `nonce`: nonce + `strict-dynamic`. Guclu politika, ancak nonce istek
+ *   basina uretildigi icin YALNIZCA dinamik render edilen rotalarda
+ *   calisir. Onceden uretilmis (statik) HTML'e istek nonce'u basilamaz.
+ * - `static`: `'self' 'unsafe-inline'`. Next.js statik HTML'e RSC verisini
+ *   satir ici <script> olarak gomer ve bunlar nonce tasiyamaz; bu mod o
+ *   sayfalar icin gereklidir.
+ *
+ * `strict-dynamic` varliginda tarayici `'self'` kaynagini YOK SAYAR; bu
+ * yuzden iki mod karistirilamaz, rotaya gore secilmelidir.
+ */
+export type CspMode = "nonce" | "static";
+
 export interface CspOptions {
-  nonce: string;
+  /** `nonce` modunda zorunlu; `static` modda kullanilmaz. */
+  nonce?: string;
   isDev: boolean;
+  mode?: CspMode;
   /** Extra origins per directive (for app-specific exceptions). */
   extra?: Partial<Record<CspDirective, string[]>>;
 }
@@ -25,12 +42,24 @@ export type CspDirective =
   | "object-src"
   | "base-uri";
 
-export function buildCsp({ nonce, isDev, extra }: CspOptions): string {
+export function buildCsp({
+  nonce,
+  isDev,
+  mode = "nonce",
+  extra,
+}: CspOptions): string {
   const self = "'self'";
+
+  // Nonce unutulursa sessizce zayif bir politika uretmek yerine basarisiz ol.
+  if (mode === "nonce" && !nonce) {
+    throw new Error("buildCsp: 'nonce' modunda nonce zorunludur");
+  }
+
   const scriptSrc = [
     self,
-    `'nonce-${nonce}'`,
-    "'strict-dynamic'",
+    ...(mode === "nonce"
+      ? [`'nonce-${nonce}'`, "'strict-dynamic'"]
+      : ["'unsafe-inline'"]),
     isDev ? "'unsafe-eval'" : "",
     "https://challenges.cloudflare.com",
     ...(extra?.["script-src"] ?? []),

@@ -56,7 +56,7 @@ async function postmarkEmail(to: string[], subject: string, body: string): Promi
 }
 
 async function slackWebhook(text: string): Promise<DispatchResult> {
-  const url = process.env.SLACK_WEBHOOK_URL;
+  const url = env.SLACK_WEBHOOK_URL;
   if (!url) {
     console.info("[dispatch] slack disabled — would send:", text.slice(0, 120));
     return { ok: true };

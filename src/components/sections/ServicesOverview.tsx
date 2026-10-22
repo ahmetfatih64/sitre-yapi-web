@@ -1,3 +1,4 @@
+import { Reveal } from "@/components/ui/Reveal";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { services } from "@/content/services";
 
@@ -5,34 +6,31 @@ export function ServicesOverview() {
   return (
     <section className="section bg-[var(--color-bg-alt)]">
       <div className="container-page">
-        <SectionHeading
-          overline="Hizmetler"
-          title="Uçtan uca yapı pratiği."
-          description="Fizibiliteden teslime, bir projenin her aşamasında tek sorumlu ekiple çalışırız."
-        />
-        <div className="mt-16 grid grid-cols-1 md:grid-cols-2 gap-px bg-[var(--color-border)]">
-          {services.map((s, idx) => (
-            <article
-              key={s.id}
-              className="bg-[var(--color-bg-alt)] p-8 md:p-12"
+        <Reveal>
+          <SectionHeading
+            overline="Hizmetler"
+            title="Uçtan uca yapı pratiği."
+            description="Fizibiliteden teslime, bir projenin her aşamasında tek sorumlu ekiple çalışırız."
+          />
+        </Reveal>
+
+        {/* Kutu ızgarası yerine mimari bir indeks: numara, başlık, açıklama. */}
+        <ul className="mt-14 lg:mt-20 border-t border-[var(--color-border)]">
+          {services.map((service, index) => (
+            <Reveal
+              key={service.id}
+              as="li"
+              delay={index * 90}
+              className="service-row"
             >
-              <div className="flex items-start gap-6">
-                <span className="eyebrow mt-2">0{idx + 1}</span>
-                <div>
-                  <h3
-                    className="text-2xl md:text-3xl"
-                    style={{ fontFamily: "var(--font-display)" }}
-                  >
-                    {s.title}
-                  </h3>
-                  <p className="mt-4 text-[var(--color-brand-soft)]">
-                    {s.summary}
-                  </p>
-                </div>
-              </div>
-            </article>
+              <span className="service-row__n" aria-hidden>
+                {String(index + 1).padStart(2, "0")}
+              </span>
+              <h3 className="service-row__title">{service.title}</h3>
+              <p className="service-row__body">{service.summary}</p>
+            </Reveal>
           ))}
-        </div>
+        </ul>
       </div>
     </section>
   );

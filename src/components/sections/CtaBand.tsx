@@ -25,33 +25,37 @@ export function CtaBand({
   const { open } = useQuickContact();
   return (
     <section
-      className={variant === "dark" ? "section text-white" : "section bg-[var(--color-bg-alt)]"}
-      style={variant === "dark" ? { background: "#2b2a28" } : undefined}
+      data-print="hide"
+      className={
+        variant === "dark"
+          ? "cta-close grain text-white"
+          : "section bg-[var(--color-bg-alt)]"
+      }
     >
-      <div className="container-page">
-        <div className="grid md:grid-cols-12 gap-10 items-end">
-          <div className="md:col-span-8">
+      <div className="container-page relative z-[2]">
+        <div className="grid md:grid-cols-12 gap-8 items-center">
+          <div className="md:col-span-7">
             {overline && (
-              <p className="eyebrow mb-5 !text-[var(--color-accent-soft)]">
+              <p className="eyebrow mb-3 !text-[var(--color-accent-soft)]">
                 {overline}
               </p>
             )}
-            <h2 className="display-lg max-w-2xl">{title}</h2>
+            <h2 className="cta-close__title">{title}</h2>
             {description && (
               <p
                 className={
-                  "lede mt-6 " +
-                  (variant === "dark" ? "text-[#cdc7bd]" : "")
+                  "cta-close__desc " +
+                  (variant === "dark" ? "text-[#b6b0a8]" : "text-[var(--color-brand-soft)]")
                 }
               >
                 {description}
               </p>
             )}
           </div>
-          <div className="md:col-span-4 flex flex-wrap gap-4 md:justify-end">
+          <div className="md:col-span-5 flex flex-wrap gap-3 md:justify-end">
             <button
               type="button"
-              onClick={() => open()}
+              onClick={() => open({ context: "kapanis-bandi" })}
               className={variant === "dark" ? "btn btn-on-dark" : "btn btn-primary"}
             >
               {primaryLabel}

@@ -29,7 +29,7 @@ export default async function Page() {
       <MediaUploader />
 
       <p className="text-xs text-[var(--color-brand-soft)]">
-        Not: Yüklenen dosya hash'i, MIME doğrulaması ve projeksiyon eşleştirmesi
+        Not: Yüklenen dosya hash&apos;i, MIME doğrulaması ve projeksiyon eşleştirmesi
         bir sonraki sprintte <code className="font-mono">MediaAttachment</code>{" "}
         modeline yazılacak.
       </p>

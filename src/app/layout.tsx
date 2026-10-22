@@ -8,6 +8,7 @@ import { CookieBar } from "@/components/layout/CookieBar";
 import { QuickContactProvider } from "@/components/forms/QuickContactProvider";
 import { ConsentProvider } from "@/lib/consent/provider";
 import { buildMetadata, organizationJsonLd, websiteJsonLd } from "@/lib/seo";
+import { serializeJsonLd } from "@/lib/json-ld";
 
 const inter = Inter({
   subsets: ["latin", "latin-ext"],
@@ -49,12 +50,12 @@ export default function RootLayout({
         <Script
           id="ld-org"
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd()) }}
+          dangerouslySetInnerHTML={{ __html: serializeJsonLd(organizationJsonLd()) }}
         />
         <Script
           id="ld-website"
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd()) }}
+          dangerouslySetInnerHTML={{ __html: serializeJsonLd(websiteJsonLd()) }}
         />
       </body>
     </html>

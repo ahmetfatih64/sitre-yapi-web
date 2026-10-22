@@ -100,7 +100,6 @@ export const sitreUrlaKonaklari: Project = {
       {
         category: "3+1",
         code: "A-Tipi",
-        image: { src: "/images/placeholders/plan-a.svg", alt: "A-Tipi 3+1 plan" },
         totalArea: 180,
         netArea: 150,
         rooms: [
@@ -117,7 +116,6 @@ export const sitreUrlaKonaklari: Project = {
       {
         category: "4+1",
         code: "B-Tipi",
-        image: { src: "/images/placeholders/plan-b.svg", alt: "B-Tipi 4+1 plan" },
         totalArea: 240,
         netArea: 198,
         rooms: [
@@ -135,7 +133,6 @@ export const sitreUrlaKonaklari: Project = {
       {
         category: "Dubleks",
         code: "C-Tipi",
-        image: { src: "/images/placeholders/plan-c.svg", alt: "C-Tipi dubleks plan" },
         totalArea: 320,
         netArea: 268,
         rooms: [
@@ -151,7 +148,50 @@ export const sitreUrlaKonaklari: Project = {
       },
     ],
   },
-  tour: { available: false },
+  progress: {
+    overline: "İnşaat durumu",
+    title: "Şantiyede neredeyiz?",
+    updatedAt: "Ekim 2026",
+    milestones: [
+      {
+        label: "Ruhsat ve izinler",
+        status: "done",
+        date: "2025 Q2",
+        note: "Yapı ruhsatı alındı, imar şartları kesinleşti.",
+      },
+      {
+        label: "Hafriyat ve zemin iyileştirme",
+        status: "done",
+        date: "2025 Q3",
+        note: "Zemin etüdüne göre iyileştirme tamamlandı.",
+      },
+      { label: "Temel ve bodrum", status: "done", date: "2025 Q4" },
+      {
+        label: "Kaba yapı (betonarme)",
+        status: "active",
+        date: "2026 Q2 – 2026 Q4",
+        note: "Blokların kat seviyeleri sırayla yükseliyor.",
+      },
+      { label: "Çatı ve su yalıtımı", status: "planned", date: "2027 Q1" },
+      { label: "Cephe ve doğrama", status: "planned", date: "2027 Q2" },
+      { label: "İnce yapı ve tesisat", status: "planned", date: "2027 Q2" },
+      { label: "Peyzaj ve ortak alanlar", status: "planned", date: "2027 Q3" },
+      { label: "Teslim", status: "planned", date: "2027 Q4" },
+    ],
+  },
+  tour: {
+    available: true,
+    panorama: {
+      wide: "/images/tour/panorama-4k.jpg",
+      narrow: "/images/tour/panorama-2k.jpg",
+      poster: "/images/tour/kapak.jpg",
+      posterAlt:
+        "Geniş pencereli, aydınlık bir iç mekân; ahşap denizlikte bitkiler",
+      initialYaw: 115,
+      credit: "Panorama: Poly Haven (CC0) — Sergej Majboroda",
+      isConcept: true,
+    },
+  },
   bottomCta: {
     title: "Projeyi yerinde görmek ister misiniz?",
     description:

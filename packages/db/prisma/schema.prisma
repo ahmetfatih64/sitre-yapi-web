@@ -8,7 +8,11 @@ generator client {
 
 datasource db {
   provider = "postgresql"
+  // Uygulama havuzlu bağlantıyı kullanır (Neon PgBouncer).
   url      = env("DATABASE_URL")
+  // Migration ve introspection havuz üzerinden çalışmaz; doğrudan bağlantı
+  // gerekir. Tanımsızsa Prisma DATABASE_URL'e düşer.
+  directUrl = env("DIRECT_URL")
 }
 
 // ─────────────────────────── Auth ───────────────────────────
@@ -150,6 +154,13 @@ model Project {
   coverImageUrl   String?
   tags            String[]
 
+  /// Sunumsal içerik bloğu: hero, concept, features, gallery, plans, amenities,
+  /// siteplan, bottomCta. Sorgulanmayan ama sayfada render edilen her şey.
+  /// Şekli src/content/projects/schema.ts içindeki Zod şemasıyla doğrulanır.
+  /// İlişkisel modele açmak ~8 tablo demek; sorgu ihtiyacı doğmadan bu
+  /// karmaşıklığın getirisi yok.
+  contentJson     Json?
+
   // Authoring metadata
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
@@ -270,6 +281,9 @@ model Lead {
   message              String?    @db.Text
   subject              String?
   projectInterest      String?
+  /// Plan kodu (ör. "A-Tipi"). Planlar contentJson içinde tutulduğu için
+  /// ilişki değil düz metin; hangi daire tipinin talep getirdiğini ölçer.
+  planId               String?
   ctaContext           String?
   utm                  Json?
   dedupeHash           String     @unique
