@@ -88,6 +88,11 @@ jobs:
       - uses: actions/checkout@v4
         with:
           persist-credentials: false
+          # gitleaks itilen commit aralığını `<ilk>^..<son>` olarak tarar.
+          # Varsayılan sığ klonda `<ilk>^` depoda bulunmaz, git "unknown
+          # revision" der ve tarama hiç çalışmadan düşer — sır bulunduğu
+          # için değil. Tam geçmiş şart.
+          fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
           node-version: 20
