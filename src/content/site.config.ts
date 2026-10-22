@@ -1,9 +1,31 @@
+/**
+ * Yayın adresi, derleme anında `NEXT_PUBLIC_SITE_URL`'den gelir.
+ *
+ * Kanonik adresler, OG etiketleri, sitemap, robots.txt ve JSON-LD'nin
+ * tamamı bu tek değerden türer. Değişken verilmezse aşağıdaki yedek
+ * kullanılır — yedek gerçek bir alan adı değildir, canlı dağıtımda
+ * değişken MUTLAKA verilmelidir (`npm run check:env` bunu zorunlu tutar).
+ *
+ * `NEXT_PUBLIC_*` değişkenleri derleme anında gömülür; yalnızca çalışma
+ * anında verilmesi İŞE YARAMAZ.
+ */
+export const FALLBACK_SITE_URL = "https://sitreyapi.example";
+
+/** Next.js bu ifadeyi derleme anında değeriyle değiştirir. */
+const RAW_SITE_URL = process.env.NEXT_PUBLIC_SITE_URL;
+
+export function resolveSiteUrl(raw: string | undefined = RAW_SITE_URL): string {
+  const configured = raw?.trim();
+  // Sondaki eğik çizgi `${url}/projeler` birleşimini bozar.
+  return (configured || FALLBACK_SITE_URL).replace(/\/+$/, "");
+}
+
 export const siteConfig = {
   name: "Sitre Yapı",
   tagline: "İyi inşa edilmiş, iyi düşünülmüş mekanlar.",
   description:
     "Sitre Yapı, mimari özen ve uzun vadeli değeri buluşturan bir yapı markasıdır. Konut ve karma kullanımlı projelerle yaşam alanları geliştiriyoruz.",
-  url: "https://sitreyapi.example",
+  url: resolveSiteUrl(),
   locale: "tr" as const,
   defaultOgImage: "/brand/ana_logo.jpeg",
   founders: [

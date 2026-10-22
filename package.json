@@ -15,7 +15,7 @@
     "lint": "next lint --max-warnings=0",
     "typecheck": "tsc --noEmit",
     "validate:content": "node scripts/content-validate.mjs",
-    "test:unit": "tsx --test packages/auth/src/*.test.ts packages/security/src/*.test.ts src/lib/*.test.ts src/content/projects/*.test.ts tests/guards/*.test.ts",
+    "test:unit": "tsx --test packages/auth/src/*.test.ts packages/security/src/*.test.ts src/lib/*.test.ts src/content/*.test.ts src/content/projects/*.test.ts tests/guards/*.test.ts",
     "test:e2e": "playwright test",
     "test:e2e:install": "playwright install --with-deps chromium",
     "check:env": "node scripts/env-check.mjs",

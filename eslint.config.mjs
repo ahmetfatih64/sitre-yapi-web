@@ -52,6 +52,12 @@ const eslintConfig = [
       // NEXT_RUNTIME Next.js tarafından enjekte edilen çalışma zamanı işareti,
       // uygulama yapılandırması değil.
       "src/instrumentation.ts",
+      // site.config istemci bileşenlerinde de kullanılır. `@/lib/env`
+      // `process.env` nesnesinin tamamını okur ve yalnızca sunucuda çalışır;
+      // istemcide `undefined` dönüp hydration uyuşmazlığı yaratırdı. Burada
+      // doğrudan `process.env.NEXT_PUBLIC_SITE_URL` okunur — Next.js bu
+      // ifadeyi her iki pakette de derleme anında değeriyle değiştirir.
+      "src/content/site.config.ts",
     ],
     rules: { "no-restricted-properties": "off" },
   },

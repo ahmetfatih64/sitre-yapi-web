@@ -341,7 +341,9 @@ test.describe("etiket süzgeci", () => {
 
     await page.getByRole("button", { name: "Doğa", exact: true }).click();
     await expect.poll(() => cards.count()).toBeLessThan(all);
-    await expect(page).toHaveURL(/etiket=/);
+    // Dev sunucusunda router.replace bir RSC isteği tetikler; paralel koşuda
+    // varsayılan 5 sn'yi aşabiliyor. Belirlenimci bekleme kullanılır.
+    await page.waitForURL(/etiket=/, { timeout: 20_000 });
   });
 
   test("birden çok etiket 'veya' olarak birleşir", async ({ page }) => {
@@ -397,7 +399,9 @@ test.describe("etiket süzgeci", () => {
 
     await page.getByRole("button", { name: "Süzgeci temizle" }).click();
     await expect.poll(() => cards.count()).toBe(all);
-    await expect(page).not.toHaveURL(/etiket=|durum=/);
+    await page.waitForURL((url) => !/etiket=|durum=/.test(url.search), {
+      timeout: 20_000,
+    });
   });
 });
 
