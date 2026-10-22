@@ -10,6 +10,15 @@ export default defineConfig({
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
+  /**
+   * Tüm testler tek bir Turbopack dev sunucusuna gider. Yerelde varsayılan
+   * işçi sayısı (çekirdeğin yarısı) o sunucuyu darboğaza sokuyor ve App
+   * Router gezinmeleri (`router.replace`) saniyelerce sürebiliyor —
+   * uygulama hatası değil, sunucu yükü. CI'da `retries` bunu telafi ediyor;
+   * yerelde retries 0 olduğu için eşzamanlılığı düşürüyoruz ki gerçek
+   * hatalar yük gürültüsünün altında kaybolmasın.
+   */
+  workers: process.env.CI ? undefined : 2,
   reporter: process.env.CI ? [["github"], ["html", { open: "never" }]] : "list",
   use: {
     baseURL: BASE_URL,
