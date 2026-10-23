@@ -104,31 +104,56 @@ Hepsi geçmeden dağıtım yapılmamalıdır; CI de aynı adımları koşar.
 - [ ] Proje sayfasında "Kataloğu indir" → PDF'te üç plan tipinin de çıktığını
       görün
 
-## 6b. Bilinen risk: derleme Google Fonts'a bağımlı
+## 6b. Bağımlılık açıkları — mevcut durum
 
-`src/app/layout.tsx` fontları `next/font/google` ile yükler (Inter, Fraunces).
-Bu, **derleme anında** `fonts.googleapis.com` adresine istek atar. Google
-erişilemezse ya da istek sınırlanırsa derleme şu hatayla düşer:
+`npm audit` 9 "high" bildiriyor. **Kritik ve orta seviye açık yoktur.**
+Kalanların hepsi tek tek incelendi; hiçbiri bu kod tabanından
+sömürülebilir değil ve hiçbirinin uygulanabilir bir yaması yok.
 
+### Lint zinciri — üretime çıkmaz (5 kayıt)
+
+`eslint-config-next`, `@next/eslint-plugin-next`, `braces`, `micromatch`,
+`fast-glob`.
+
+`eslint-config-next` bir **devDependency**'dir; bu paketlerin hiçbiri
+üretim paketine girmez, yalnızca geliştirme sırasında lint çalıştırılırken
+kullanılır. Ayrıca `braces` ve `fast-glob` için bildirilen etkilenen aralık
+`*` — yani **hiçbir sürümde yama yok**, en güncel sürüm de etkileniyor.
+
+> `npm audit fix` bunlar için `eslint-config-next@14.2.35` öneriyor. Bu bir
+> **düşürmedir** ve Next 15 ile çelişir; uygulanmamalıdır.
+
+### Auth.js zinciri (4 kayıt)
+
+`nodemailer`, `@auth/core`, `@auth/prisma-adapter`, `next-auth`.
+
+Kök neden `nodemailer`'daki SMTP komut enjeksiyonudur; vektör
+`envelope.size` alanıdır.
+
+**Bu kod tabanından ulaşılamaz:** `envelope` alanı hiçbir yerde
+kullanılmıyor (`grep -rn "envelope" src/ packages/` boş döner). Tek
+nodemailer kullanımı `src/lib/leads/direct-notify.ts` içindedir ve
+`sendMail`'e yalnızca `from`, `to`, `subject`, `text` geçer. `to` değeri
+kullanıcıdan değil `LEAD_NOTIFY_TO` ortam değişkeninden gelir.
+
+**Yükseltme yolu yok:** açık `nodemailer <= 10.0.9` sürümlerini etkiliyor,
+ancak `next-auth` ve `@auth/core` (en güncel sürümleri dahil) nodemailer'ı
+`^7.0.7 || ^8.0.5` olarak bildiriyor. 10.x'e çıkmak bildirilen eşdüzey
+aralığın dışına taşar ve sihirli bağlantıyla girişi sessizce bozabilir.
+
+> **Takip edilmeli:** Auth.js nodemailer 10 desteğini eklediğinde
+> `nodemailer` ve `next-auth` birlikte yükseltilmeli, ardından yönetim
+> paneline sihirli bağlantıyla giriş elle denenmelidir.
+
+### Denetim nasıl tekrarlanır
+
+```bash
+npm audit                    # özet
+npm audit --json             # paket bazlı, fixAvailable alanıyla
 ```
-An error occurred in `next/font`.
-TypeError: Cannot read properties of null (reading '1')
-```
 
-Bu 22 Ekim 2026'da CI'da bir kez gerçekleşti; işi yeniden çalıştırmak
-yetti. Yani **geçici ama tekrarlayabilir**: hata mesajı nedeni hiç belli
-etmediği için, karşılaşan kişi kendi değişikliğinde hata arar.
-
-**Geçici çözüm:** derlemeyi yeniden çalıştırın.
-
-**Kalıcı çözüm:** fontları depoya alıp `next/font/local`'a geçin. Inter ve
-Fraunces OFL lisanslıdır, dağıtımı serbesttir. Derleme ağdan tamamen
-bağımsız hale gelir — proje zaten panorama görüntüleyicisini (pannellum)
-aynı gerekçeyle CDN yerine kendi sunucusundan servis ediyor.
-
-> Geçerken `latin-ext` alt kümesi **mutlaka** alınmalıdır; atlanırsa
-> ş, ğ, İ, ı gibi Türkçe karakterler yedek fonta düşer ve metin bozulur.
-> Şu anki ayarlar: Inter değişken font, Fraunces 400 ve 500 ağırlıkları.
+Yeni bir kayıt çıkarsa aynı soruları sorun: üretime çıkıyor mu, vektör bu
+koddan ulaşılabilir mi, uygulanabilir bir yama var mı.
 
 ---
 
