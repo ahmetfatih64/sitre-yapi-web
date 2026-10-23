@@ -104,6 +104,34 @@ Hepsi geçmeden dağıtım yapılmamalıdır; CI de aynı adımları koşar.
 - [ ] Proje sayfasında "Kataloğu indir" → PDF'te üç plan tipinin de çıktığını
       görün
 
+## 6b. Bilinen risk: derleme Google Fonts'a bağımlı
+
+`src/app/layout.tsx` fontları `next/font/google` ile yükler (Inter, Fraunces).
+Bu, **derleme anında** `fonts.googleapis.com` adresine istek atar. Google
+erişilemezse ya da istek sınırlanırsa derleme şu hatayla düşer:
+
+```
+An error occurred in `next/font`.
+TypeError: Cannot read properties of null (reading '1')
+```
+
+Bu 22 Ekim 2026'da CI'da bir kez gerçekleşti; işi yeniden çalıştırmak
+yetti. Yani **geçici ama tekrarlayabilir**: hata mesajı nedeni hiç belli
+etmediği için, karşılaşan kişi kendi değişikliğinde hata arar.
+
+**Geçici çözüm:** derlemeyi yeniden çalıştırın.
+
+**Kalıcı çözüm:** fontları depoya alıp `next/font/local`'a geçin. Inter ve
+Fraunces OFL lisanslıdır, dağıtımı serbesttir. Derleme ağdan tamamen
+bağımsız hale gelir — proje zaten panorama görüntüleyicisini (pannellum)
+aynı gerekçeyle CDN yerine kendi sunucusundan servis ediyor.
+
+> Geçerken `latin-ext` alt kümesi **mutlaka** alınmalıdır; atlanırsa
+> ş, ğ, İ, ı gibi Türkçe karakterler yedek fonta düşer ve metin bozulur.
+> Şu anki ayarlar: Inter değişken font, Fraunces 400 ve 500 ağırlıkları.
+
+---
+
 ## 7. Devredilecek hesaplar
 
 - GitHub deposu
