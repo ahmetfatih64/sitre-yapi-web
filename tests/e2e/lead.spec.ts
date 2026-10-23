@@ -19,9 +19,32 @@ test.describe("lead ingest — api contract", () => {
       },
     });
 
-    expect(response.status()).toBeLessThan(500);
-    const body = (await response.json()) as { ok: boolean; code?: string };
+    const body = (await response.json()) as {
+      ok: boolean;
+      code?: string;
+      error?: string;
+    };
     expect(typeof body.ok).toBe("boolean");
+
+    if (await hasLeadChannel(request)) {
+      // Kaydedilebilecek bir yer varsa talep kabul edilmelidir.
+      expect(response.status()).toBeLessThan(500);
+      expect(body.ok).toBe(true);
+      return;
+    }
+
+    /**
+     * Hiçbir kanal yapılandırılmamışsa (CI'da veritabanı da e-posta da yok)
+     * doğru davranış BAŞARISIZ dönmektir. Buradaki asıl sözleşme şudur:
+     * talep hiçbir yere ulaşmadığında sistem başarılı taklidi YAPMAMALI,
+     * aksi halde müşteri formu doldurur, "teşekkürler" görür ve talep
+     * sessizce kaybolur.
+     */
+    expect(body.ok).toBe(false);
+    expect(response.status()).toBeGreaterThanOrEqual(500);
+    expect(body.code).toBe("server_error");
+    // Kullanıcıya alternatif bir kanal gösterilmelidir.
+    expect(body.error ?? "").toMatch(/telefon|whatsapp/i);
   });
 
   test("POST /api/contact rejects missing consent", async ({ request }) => {
@@ -65,6 +88,22 @@ test.describe("lead ingest — api contract", () => {
  * doğrular. Tek bir sabit beklenti yazmak, dev sunucusunda hiçbir zaman
  * geçmeyen bir teste yol açıyordu.
  */
+/**
+ * Talebin kaydedilebileceği en az bir kanal var mı?
+ *
+ * Veritabanı yoksa son çare doğrudan e-posta bildirimidir; ikisi de yoksa
+ * talep hiçbir yere ulaşamaz ve API'nin bunu dürüstçe bildirmesi beklenir.
+ */
+async function hasLeadChannel(
+  request: import("@playwright/test").APIRequestContext
+): Promise<boolean> {
+  const res = await request.get("/api/health");
+  const body = (await res.json()) as {
+    env?: { hasDb?: boolean; hasPostmark?: boolean };
+  };
+  return Boolean(body.env?.hasDb || body.env?.hasPostmark);
+}
+
 async function isProduction(
   request: import("@playwright/test").APIRequestContext
 ): Promise<boolean> {
