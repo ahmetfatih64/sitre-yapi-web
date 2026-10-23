@@ -91,7 +91,7 @@ export function ProjectLocation({ project }: { project: Project }) {
                       {n.category}
                     </p>
                   </div>
-                  <span className="text-sm tabular-nums text-[var(--color-accent)]">
+                  <span className="text-sm tabular-nums text-[var(--color-accent-ink)]">
                     {n.distance}
                   </span>
                 </li>

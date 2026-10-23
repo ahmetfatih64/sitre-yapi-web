@@ -4,6 +4,7 @@ import { getAllProjects } from "@/content/projects/service";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { CtaBand } from "@/components/sections/CtaBand";
 import { ProjectsFilter } from "./ProjectsFilter";
+import { ProjectsFilterSkeleton } from "./ProjectsFilterSkeleton";
 import { buildMetadata } from "@/lib/seo";
 
 export const metadata: Metadata = buildMetadata({
@@ -14,6 +15,8 @@ export const metadata: Metadata = buildMetadata({
 });
 
 export default async function ProjelerPage() {
+  const projects = await getAllProjects();
+
   return (
     <>
       <section className="section pt-40">
@@ -28,9 +31,11 @@ export default async function ProjelerPage() {
         </div>
       </section>
 
-      {/* useSearchParams Suspense sınırı ister; sayfa statik üretildiği için şart. */}
-      <Suspense fallback={<div className="container-page pb-32" />}>
-        <ProjectsFilter projects={await getAllProjects()} />
+      {/* useSearchParams Suspense sınırı ister; sayfa statik üretildiği için şart.
+          Yedek, gerçek düzenin yerini ayırır — boş bırakılırsa CTA bandı
+          içerik gelince ~1800px sıçrıyor ve CLS hedefi aşılıyor. */}
+      <Suspense fallback={<ProjectsFilterSkeleton count={projects.length} />}>
+        <ProjectsFilter projects={projects} />
       </Suspense>
 
       <CtaBand

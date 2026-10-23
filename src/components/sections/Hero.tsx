@@ -28,6 +28,16 @@ export function Hero({
 }: Props) {
   const { open } = useQuickContact();
   return (
+    <>
+      {/**
+       * Hero görseli CSS `background-image` ile veriliyor; tarayıcının ön
+       * tarayıcısı CSS çözümlenmeden onu keşfedemez ve geç indirir. Bu
+       * sayfalarda LCP öğesi tam da bu görsel olduğu için açıkça
+       * önceliklendiriliyor.
+       */}
+      {backgroundImage && (
+        <link rel="preload" as="image" href={backgroundImage} fetchPriority="high" />
+      )}
     <section
       className="relative min-h-[92vh] flex items-end overflow-hidden dark-section"
       style={{
@@ -81,5 +91,6 @@ export function Hero({
         Aşağı kaydır
       </span>
     </section>
+    </>
   );
 }

@@ -10,7 +10,10 @@
   --color-bg-dark: #14100d;
   --color-surface: #ffffff;
   --color-border: #e6e2dd;
-  --color-muted: #9a9590;
+  /* WCAG AA icin koyulastirildi: #9a9590 beyazda 2.97:1 ile kaliyordu
+     (gereken 4.5:1). #706b66 beyazda 5.27, alt zeminde 4.84 verir ve
+     ayni sicak gri tonunu korur. */
+  --color-muted: #706b66;
   --color-success: #2e7d4f;
   --color-error: #b4433a;
   --color-warning: #c8931d;
@@ -1390,5 +1393,44 @@
 
 /* turbopack yeniden derleme tetigi */
 
+
+
+
+
+/* ===========================================================
+   Dokunmatik isabet alanı
+   SUCCESS_CRITERIA: butonlar, nav öğeleri ve form alanları için
+   min 44x44. Yalnızca kaba işaretleyicide (parmak) uygulanır;
+   fare ile kullanımda görsel ritim korunur.
+
+   `.pnlm-*` hariç tutulur: panorama görüntüleyicisi kendi
+   denetimlerini kendi ölçüleriyle konumlandırır (vendor kopyası).
+   =========================================================== */
+@media (pointer: coarse) {
+  button:not([class*="pnlm-"]),
+  [role="button"]:not([class*="pnlm-"]) {
+    min-height: 44px;
+  }
+
+  /* Bağlantılar satır içi olduğu için `min-height` tek başına ETKİSİZDİR;
+     kutu modeli değişmeden yükseklik uygulanmaz. */
+  .site-footer nav a[href],
+  header nav a[href] {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+  }
+
+  /* Onay kutusu etiketi: asıl dokunma hedefi kutu değil, saran etiket. */
+  label:has(input[type="checkbox"]) {
+    min-height: 44px;
+  }
+
+  /* Yalnızca simge taşıyan kare düğmeler genişlikte de büyümeli. */
+  .touch-icon {
+    min-width: 44px;
+    min-height: 44px;
+  }
+}
 
 

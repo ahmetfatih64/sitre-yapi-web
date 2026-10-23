@@ -77,7 +77,7 @@ export function Header() {
               className="text-xl tracking-tight leading-tight"
               style={{ fontFamily: "var(--font-display)" }}
             >
-              Sitre <span className="text-[var(--color-accent)]">Yapı</span>
+              Sitre <span className="text-[var(--color-accent-ink)]">Yapı</span>
             </span>
             <span
               className={cn(
@@ -265,7 +265,7 @@ export function Header() {
             type="button"
             aria-label="Menüyü kapat"
             onClick={() => setMobileOpen(false)}
-            className="w-10 h-10 rounded-full flex items-center justify-center transition-all"
+            className="touch-icon w-10 h-10 rounded-full flex items-center justify-center transition-all"
             style={{
               background: "rgba(43,42,40,0.06)",
               color: "var(--color-brand)",

@@ -533,7 +533,17 @@ test.describe("fontlar", () => {
         .filter((n) => /\.woff2?(\?|$)/.test(n))
     );
     expect(kaynaklar.length).toBeGreaterThan(0);
-    expect(kaynaklar.every((n) => n.includes("/_next/"))).toBe(true);
+
+    /**
+     * Sözleşme: hiçbir font üçüncü taraftan gelmez. Yol deseni yerine
+     * kaynak (origin) karşılaştırılır — geliştirme sunucusu kendi hata
+     * katmanı fontunu `/__nextjs_font/` altından servis ediyor ve yola
+     * bakan bir kontrol bu yüzden üretimde olmayan bir şeye takılıyordu.
+     */
+    const disKaynak = kaynaklar.filter(
+      (n) => new URL(n).origin !== new URL(page.url()).origin
+    );
+    expect(disKaynak, "fontlar yalnızca kendi sunucumuzdan gelmeli").toEqual([]);
   });
 
   test("Türkçe karakterler yerel fonttan gelir", async ({ page }) => {

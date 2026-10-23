@@ -9,13 +9,36 @@ import { useEffect, useRef, useState } from "react";
  * durdurulabilir olmalı. Ayrıca `prefers-reduced-motion` açıksa hiç
  * başlamaz; kullanıcı isterse kendisi başlatır.
  */
+const POSTER = "/images/stock/anasayfa_poster.jpg";
+const VIDEO_SRC = "/images/stock/anasayfa_hero.mp4";
+
 export function HeroVideo() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [playing, setPlaying] = useState(true);
+  /**
+   * Sayfanın LCP öğesi bu videonun posteridir. `src` işaretlemede
+   * verildiğinde ~886KB'lık video poster ile aynı anda inmeye başlıyor,
+   * bant genişliğini paylaşıyor ve LCP'yi eşiğin üstüne taşıyordu.
+   * Bu yüzden kaynak ilk boyamadan sonra bağlanır.
+   */
+  const [src, setSrc] = useState<string | undefined>(undefined);
+
+  useEffect(() => {
+    const baslat = () => setSrc(VIDEO_SRC);
+    const w = window as typeof window & {
+      requestIdleCallback?: (cb: () => void, o?: { timeout: number }) => number;
+    };
+    if (typeof w.requestIdleCallback === "function") {
+      w.requestIdleCallback(baslat, { timeout: 2000 });
+      return;
+    }
+    const t = window.setTimeout(baslat, 300);
+    return () => window.clearTimeout(t);
+  }, []);
 
   useEffect(() => {
     const video = videoRef.current;
-    if (!video) return;
+    if (!video || !src) return;
 
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
       video.pause();
@@ -24,7 +47,7 @@ export function HeroVideo() {
     }
     // Tarayıcı otomatik oynatmayı reddederse durum doğru kalsın.
     video.play().catch(() => setPlaying(false));
-  }, []);
+  }, [src]);
 
   const toggle = () => {
     const video = videoRef.current;
@@ -39,20 +62,22 @@ export function HeroVideo() {
 
   return (
     <div className="relative w-full aspect-video md:absolute md:inset-0 md:aspect-auto md:h-full">
+      {/* Poster LCP öğesi; tarayıcı onu en yüksek öncelikle indirsin. */}
+      <link rel="preload" as="image" href={POSTER} fetchPriority="high" />
       <video
         ref={videoRef}
-        src="/images/stock/anasayfa_hero.mp4"
-        poster="/images/stock/anasayfa_poster.jpg"
+        src={src}
+        poster={POSTER}
         loop
         muted
         playsInline
-        preload="metadata"
+        preload="none"
         className="w-full h-full object-cover"
       />
       <button
         type="button"
         onClick={toggle}
-        className="hero-video-toggle"
+        className="hero-video-toggle touch-icon"
         aria-label={playing ? "Videoyu duraklat" : "Videoyu oynat"}
       >
         {playing ? (
