@@ -512,3 +512,68 @@ test.describe("katalog / baskı", () => {
     ).toBeVisible();
   });
 });
+
+test.describe("fontlar", () => {
+  test("yerel fontlar yüklenir, Google'a istek gitmez", async ({ page }) => {
+    const disaridan: string[] = [];
+    page.on("request", (r) => {
+      if (/fonts\.(googleapis|gstatic)\.com/.test(r.url())) disaridan.push(r.url());
+    });
+
+    await page.goto("/hakkimizda");
+    await dismissConsent(page);
+    await page.evaluate(() => document.fonts.ready);
+
+    expect(disaridan, "fontlar depodan servis edilmeli").toEqual([]);
+
+    const kaynaklar = await page.evaluate(() =>
+      performance
+        .getEntriesByType("resource")
+        .map((e) => e.name)
+        .filter((n) => /\.woff2?(\?|$)/.test(n))
+    );
+    expect(kaynaklar.length).toBeGreaterThan(0);
+    expect(kaynaklar.every((n) => n.includes("/_next/"))).toBe(true);
+  });
+
+  test("Türkçe karakterler yerel fonttan gelir", async ({ page }) => {
+    /**
+     * `latin-ext` alt kümesi atlanırsa ş, ğ, İ, ı yedek fonta düşer ve
+     * metin gözle görülür biçimde bozulur. Font Loading API bunu doğrudan
+     * söyleyebilir: check() istenen metnin tüm glifleri yüklü yüzlerde
+     * varsa true döner.
+     */
+    await page.goto("/hakkimizda");
+    await dismissConsent(page);
+    await page.evaluate(() => document.fonts.ready);
+
+    const sonuc = await page.evaluate(() => {
+      const gövde = getComputedStyle(document.body).fontFamily.split(",")[0].trim();
+      const başlık = getComputedStyle(document.querySelector("h1")!)
+        .fontFamily.split(",")[0]
+        .trim();
+      const tr = "çÇğĞıİöÖşŞüÜ";
+      return {
+        gövde,
+        başlık,
+        gövdeKapsar: document.fonts.check(`20px ${gövde}`, tr),
+        başlıkKapsar: document.fonts.check(`80px ${başlık}`, tr),
+      };
+    });
+
+    expect(sonuc.gövdeKapsar, `gövde fontu (${sonuc.gövde}) Türkçe karakterleri kapsamıyor`).toBe(true);
+    expect(sonuc.başlıkKapsar, `başlık fontu (${sonuc.başlık}) Türkçe karakterleri kapsamıyor`).toBe(true);
+  });
+
+  test("başlık yedek fonta düşmez", async ({ page }) => {
+    await page.goto("/hakkimizda");
+    await dismissConsent(page);
+    await page.evaluate(() => document.fonts.ready);
+
+    const aile = await page.evaluate(
+      () => getComputedStyle(document.querySelector("h1")!).fontFamily
+    );
+    // next/font yerel dosyadan karma aile adı üretir; Georgia'ya düşmemeli.
+    expect(aile.split(",")[0].trim().replace(/"/g, "")).not.toMatch(/Georgia|serif/i);
+  });
+});

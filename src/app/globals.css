@@ -15,8 +15,16 @@
   --color-error: #b4433a;
   --color-warning: #c8931d;
 
-  --font-display: "Fraunces", "Playfair Display", Georgia, serif;
-  --font-body: "Inter", "Helvetica Neue", system-ui, sans-serif;
+  /* next/font yerel dosyadan karma (hash) içeren bir aile adı üretir; düz
+     "Inter" / "Fraunces" adları artık eşleşmez. Aşağıdaki değişkenleri
+     next/font layout.tsx'te tanımlar ve kendi yedek yüzünü de içlerine
+     ekler (örn. "__inter_x, __inter_x_Fallback"). Tam yedek yığını
+     layout.tsx'teki `fallback` alanında tanımlıdır — next/font oradan
+     `size-adjust` hesaplayıp font yüklenirken oluşan kaymayı azaltır.
+     Buradaki jenerik adlar yalnızca değişken hiç tanımlanmazsa devreye
+     girer. */
+  --font-display: var(--font-display-loaded), Georgia, serif;
+  --font-body: var(--font-body-loaded), system-ui, sans-serif;
 
   --radius-none: 0;
   --radius-xs: 2px;
@@ -1381,4 +1389,6 @@
 
 
 /* turbopack yeniden derleme tetigi */
+
+
 
