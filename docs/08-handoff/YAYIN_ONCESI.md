@@ -157,6 +157,44 @@ koddan ulaşılabilir mi, uygulanabilir bir yama var mı.
 
 ---
 
+## 6c. Yayın sonrası ölçüm
+
+### Gerçek kullanıcı verisi için ayrı altyapı kurmayın
+
+Core Web Vitals'ın **saha (field)** verisi — yani gerçek ziyaretçilerin
+yaşadığı LCP/CLS/INP — site yayına girip indekslendikten sonra **Google
+Search Console** üzerinden ücretsiz görülür. Google'ın sıralamada kullandığı
+veri de budur.
+
+Kendi RUM altyapınızı (web-vitals + uç nokta + saklama) kurmak aynı veriyi
+daha pahalıya üretmek olur. Yapılacak tek şey:
+
+- [ ] Search Console'a mülk ekleyin ve alan adını doğrulayın
+- [ ] `sitemap.xml` adresini Search Console'a bildirin
+- [ ] İlk 4 hafta "Core Web Vitals" raporunu izleyin
+
+### Kabul ölçütlerini tekrar koşun
+
+Gerçek içerik yüklendikten sonra:
+
+```bash
+npm run build:prod
+npm run start:prod                 # ayrı terminalde
+npm run qa:acceptance              # responsive, dokunma, a11y, CWV
+npm run qa:acceptance -- --base https://alan-adiniz
+```
+
+Görsel ağırlıkları ve metin uzunlukları değişince LCP, CLS ve taşma
+davranışı da değişir; bu yüzden ölçüm içerikle birlikte yenilenmelidir.
+Ayrıntılı sonuçlar ve bilinen sapmalar: [../07-qa/QA_RAPORU.md](../07-qa/QA_RAPORU.md).
+
+> **Bilinen açık:** ana sayfanın Lighthouse Performance skoru 66, ölçüt 80.
+> Diğer sayfalar ölçütü karşılıyor (80 ve 88); Accessibility, Best Practices
+> ve SEO her sayfada 100. Kalan fark ağ değil istemci render maliyetidir ve
+> kapatmak ana sayfadaki istemci bileşenlerini azaltmayı gerektirir.
+
+---
+
 ## 7. Devredilecek hesaplar
 
 - GitHub deposu

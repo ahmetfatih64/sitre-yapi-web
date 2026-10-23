@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useQuickContact } from "@/components/forms/QuickContactProvider";
 
@@ -28,27 +29,44 @@ export function Hero({
 }: Props) {
   const { open } = useQuickContact();
   return (
-    <>
-      {/**
-       * Hero görseli CSS `background-image` ile veriliyor; tarayıcının ön
-       * tarayıcısı CSS çözümlenmeden onu keşfedemez ve geç indirir. Bu
-       * sayfalarda LCP öğesi tam da bu görsel olduğu için açıkça
-       * önceliklendiriliyor.
-       */}
-      {backgroundImage && (
-        <link rel="preload" as="image" href={backgroundImage} fetchPriority="high" />
-      )}
     <section
       className="relative min-h-[92vh] flex items-end overflow-hidden dark-section"
-      style={{
-        backgroundImage: backgroundImage
-          ? `linear-gradient(180deg, rgba(20,16,13,0.25) 0%, rgba(20,16,13,0.75) 100%), url(${backgroundImage})`
-          : "linear-gradient(180deg, #1c1711 0%, #0a0806 100%)",
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-      }}
+      style={
+        backgroundImage
+          ? undefined
+          : { background: "linear-gradient(180deg, #1c1711 0%, #0a0806 100%)" }
+      }
       aria-label={title}
     >
+      {backgroundImage && (
+        <>
+          {/**
+           * Hero görseli CSS `background-image` ile verilirse Next'in görsel
+           * işlem hattını tamamen atlar: ham JPEG gider, AVIF/WebP üretilmez
+           * ve tarayıcının ön tarayıcısı onu geç keşfeder. Bu sayfalarda LCP
+           * öğesi tam da bu görsel olduğu için `next/image` + `priority`
+           * kullanılır — aynı görsel 257 KB yerine ~19 KB (AVIF) iniyor.
+           */}
+          <Image
+            src={backgroundImage}
+            alt=""
+            fill
+            priority
+            sizes="100vw"
+            className="object-cover"
+            aria-hidden="true"
+          />
+          {/* Metnin okunabilirliği için koyulaştırma; görselin üstünde durur. */}
+          <div
+            aria-hidden="true"
+            className="absolute inset-0"
+            style={{
+              background:
+                "linear-gradient(180deg, rgba(20,16,13,0.25) 0%, rgba(20,16,13,0.75) 100%)",
+            }}
+          />
+        </>
+      )}
       <div className="container-page relative z-10 pb-20 md:pb-28 pt-36">
         <p className="eyebrow !text-[var(--color-accent-soft)] mb-6">
           {overline}
@@ -91,6 +109,5 @@ export function Hero({
         Aşağı kaydır
       </span>
     </section>
-    </>
   );
 }

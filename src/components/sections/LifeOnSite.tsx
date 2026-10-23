@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 
@@ -107,16 +108,30 @@ function SceneBlock({ scene, reversed }: { scene: Scene; reversed: boolean }) {
   return (
     <div ref={wrapRef} className={cn("scene", reversed && "scene--reversed")}>
       <figure className="scene__media">
+        {/**
+         * Poster `<video poster>` ile verilirse ham JPEG, ekranın altında
+         * olmasına rağmen sayfa açılışında indirilir ve Next'in görsel
+         * işlem hattını atlar. `next/image` hem tembel yükler hem AVIF
+         * üretir; video görüş alanına girince üstünü kapatır.
+         */}
+        <Image
+          src={scene.poster}
+          alt=""
+          fill
+          loading="lazy"
+          sizes="(min-width: 768px) 50vw, 100vw"
+          className="object-cover"
+          aria-hidden="true"
+        />
         <video
           ref={videoRef}
           src={loaded ? scene.src : undefined}
-          poster={scene.poster}
           loop
           muted
           playsInline
           preload="none"
           aria-label={scene.alt}
-          className="scene__video"
+          className="scene__video relative"
         />
       </figure>
 

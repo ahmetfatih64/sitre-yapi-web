@@ -67,8 +67,46 @@ Laboratuvar ölçümü — 390×844, 4× CPU kısıtlaması, ~10 Mbps / 70 ms.
 | `/projeler/[slug]` | 2.24s | 0.000 |
 | `/iletisim` | 0.98s | 0.000 |
 
-> Lighthouse kurulu değildir; skorlar ölçülmemiştir. Yukarıdaki CWV
-> değerleri doğrudan `PerformanceObserver` ile alınmıştır.
+### 3d. Lighthouse skorları
+
+Mobil profil, Lighthouse 13, **simüle Slow 4G** (1.6 Mbps / 150 ms / 4x CPU).
+Lighthouse kalıcı bir bağımlılık değildir; `npx lighthouse@13` ile koşulur.
+
+| Sayfa | Performance | Accessibility | Best Practices | SEO |
+|---|---|---|---|---|
+| Ölçüt (min / hedef) | 80 / 90 | 95 / 100 | 90 / 95 | 95 / 100 |
+| `/` | **66** | 100 | 100 | 100 |
+| `/projeler/[slug]` | 80 | 100 | 100 | 100 |
+| `/iletisim` | 88 | 100 | 100 | 100 |
+
+**Accessibility, Best Practices ve SEO her sayfada 100** — üçü de hedefin
+üstünde.
+
+**Ana sayfa Performance ölçütü karşılamıyor (66 < 80).** Bu turda 63'ten
+66'ya çıkarıldı ve asıl kazanım skorda değil kullanıcı deneyiminde:
+
+| | Önce | Sonra |
+|---|---|---|
+| Toplam transfer | ~3.9 MB | **699 KB** |
+| LCP (Lighthouse) | 7.2s | **4.7s** |
+
+Kalan darboğaz **ağ değil, CPU**: TBT 690 ms, ana iş parçacığında
+Style & Layout ~1.5 s. Yani sorun bir dosyanın büyüklüğü değil, uzun ve
+etkileşimli ana sayfanın istemcide render maliyeti.
+
+**80'e çıkarmak için gereken:** ana sayfadaki istemci bileşenlerinin
+(`"use client"`) azaltılması ya da ekran altı bölümlerin geç monte
+edilmesi. Bu mimari bir değişikliktir, görsel/dosya optimizasyonuyla
+kapanmaz — bu turda o yol sonuna kadar gidildi.
+
+> **Not — iki ölçüm neden farklı:** §3c'deki LCP değerleri (hepsi ≤2.2s)
+> 10 Mbps / 70 ms ile alınmıştır; Lighthouse 1.6 Mbps / 150 ms kullanır.
+> Aynı sayfa, farklı varsayım. Ölçüt Lighthouse metodolojisini şart
+> koştuğu için **bağlayıcı olan yukarıdaki tablodur.**
+
+> Bu skorlar yerel sunucuya karşıdır; gerçek sunucunun gecikmesini ve
+> gerçek içeriğin ağırlığını yansıtmaz. Yayın sonrası gerçek alan adında
+> tekrarlanmalıdır.
 
 ---
 
@@ -81,6 +119,7 @@ Laboratuvar ölçümü — 390×844, 4× CPU kısıtlaması, ~10 Mbps / 70 ms.
 | Renk kontrastı, logo ve mesafeler | Açık zeminde `--color-accent` 2.21:1 | O iki yerde `--color-accent-ink` kullanıldı (5.21:1) |
 | Dokunma hedefleri 32–42px | Kaba işaretleyici için asgari boyut kuralı yoktu | `@media (pointer: coarse)` altında min 44px; simge düğmeleri için `.touch-icon` |
 | Footer bağlantıları 17px | `min-height` satır içi öğelere **uygulanmaz** | O bağlantılara `inline-flex` verildi |
+| Ana sayfa 3.9 MB transfer, LCP 7.2s (Lighthouse) | 3.1 MB'lık hero videosu her koşulda iniyordu; hero ve bölüm posterleri `<video poster>` ile ham JPEG olarak gidiyor, Next'in görsel hattını atlıyordu | Video yalnızca geniş ekran + hızlı bağlantı + hareket azaltma kapalıyken yükleniyor; tüm posterler `next/image` (AVIF) üzerinden, ekran altındakiler tembel |
 | `/` LCP 2.53s, `/projeler/[slug]` 2.92s | Hero videosu (886KB) LCP posteriyle eşzamanlı iniyordu; hero arka planı CSS'te olduğu için ön tarayıcı geç keşfediyordu | Video `src`'si ilk boyamadan sonra bağlanıyor; poster ve hero görseli `preload` + `fetchpriority=high` |
 
 ### Yanlış alarm olduğu doğrulananlar

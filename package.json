@@ -29,7 +29,8 @@
     "db:check": "tsx scripts/db-check.ts",
     "db:diff": "node scripts/db-diff.mjs",
     "build:prod": "node scripts/prod.mjs build",
-    "start:prod": "node scripts/prod.mjs start"
+    "start:prod": "node scripts/prod.mjs start",
+    "qa:acceptance": "node scripts/qa-acceptance.mjs"
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.11.2",
