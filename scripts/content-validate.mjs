@@ -13,7 +13,7 @@
  * Exits with non-zero status when any HARD check fails.
  */
 import { readFileSync, existsSync } from "node:fs";
-import { fileURLToPath, pathToFileURL } from "node:url";
+import { fileURLToPath } from "node:url";
 import { dirname, join, resolve } from "node:path";
 
 const __filename = fileURLToPath(import.meta.url);

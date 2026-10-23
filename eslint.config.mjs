@@ -8,6 +8,27 @@ const __dirname = dirname(__filename);
 const compat = new FlatCompat({ baseDirectory: __dirname });
 
 const eslintConfig = [
+  {
+    /**
+     * `next lint` bu yolları kendiliğinden hariç tutuyordu. ESLint CLI'ya
+     * geçerken açıkça yazılmaları gerekir; yoksa derleme çıktısı ve
+     * vendor dosyaları da denetlenir ve lint kullanılamaz hale gelir.
+     */
+    ignores: [
+      ".next/**",
+      ".next-prod/**",
+      "out/**",
+      "node_modules/**",
+      "coverage/**",
+      "playwright-report/**",
+      "test-results/**",
+      "next-env.d.ts",
+      // Üçüncü taraf, olduğu gibi tutulan kopya (bkz. public/vendor/*/README.md)
+      "public/vendor/**",
+      // Ayrı repo olarak tutulan proje
+      "scripts/aka_software/**",
+    ],
+  },
   ...compat.extends("next/core-web-vitals", "next/typescript"),
   {
     rules: {
@@ -40,6 +61,12 @@ const eslintConfig = [
       ],
       // info: kasıtlı operasyonel iz kaydı (outbox, lead akışı)
       "no-console": ["warn", { allow: ["info", "warn", "error"] }],
+      // `_` öneki "bilerek kullanılmıyor" demektir; arayüz gereği duran
+      // parametreleri silmek imzayı bozar.
+      "@typescript-eslint/no-unused-vars": [
+        "warn",
+        { argsIgnorePattern: "^_", varsIgnorePattern: "^_", caughtErrorsIgnorePattern: "^_" },
+      ],
     },
   },
   {
@@ -52,6 +79,11 @@ const eslintConfig = [
       // NEXT_RUNTIME Next.js tarafından enjekte edilen çalışma zamanı işareti,
       // uygulama yapılandırması değil.
       "src/instrumentation.ts",
+      // Test koşucusu yapılandırması; uygulama kodu değil.
+      "playwright.config.ts",
+      // Workspace paketleri Next uygulamasının dışındadır, `@/lib/env`
+      // onlara erişilemez.
+      "packages/**/*.ts",
       // site.config istemci bileşenlerinde de kullanılır. `@/lib/env`
       // `process.env` nesnesinin tamamını okur ve yalnızca sunucuda çalışır;
       // istemcide `undefined` dönüp hydration uyuşmazlığı yaratırdı. Burada
@@ -60,6 +92,20 @@ const eslintConfig = [
       "src/content/site.config.ts",
     ],
     rules: { "no-restricted-properties": "off" },
+  },
+  {
+    // Komut satırı araçları ekrana yazmak için vardır; çıktıları ürünün
+    // kendisidir, artık hata ayıklama izi değil.
+    files: ["scripts/**/*.{js,mjs,ts}"],
+    rules: { "no-console": "off" },
+  },
+  {
+    /**
+     * `@prisma/client` kurulu değilse stub'a düşen try/catch. `import`
+     * eşzamanlı olarak try/catch içine alınamadığı için `require` şart.
+     */
+    files: ["packages/db/src/index.ts"],
+    rules: { "@typescript-eslint/no-require-imports": "off" },
   },
 ];
 
